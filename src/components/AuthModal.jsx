@@ -16,6 +16,7 @@ import { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
+import { useTheme } from '../context/themeContext';
 import { login, register } from '../store/authSlice';
 import { CustomInput } from './Formik';
 
@@ -24,6 +25,7 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
   const toast = useToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { themes } = useTheme();
 
   const nameRef = useRef();
   const emailRef = useRef();
@@ -141,14 +143,19 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
       onClose={handleClose}
       initialFocusRef={isSignUpActive ? nameRef : emailRef}
     >
-      <ModalOverlay />
+      <ModalOverlay backgroundColor={themes.auth.overlay} />
 
-      <ModalContent mx={4} maxW={'sm'} borderRadius={'2xl'}>
+      <ModalContent
+        mx={4}
+        maxW={'sm'}
+        borderRadius={'2xl'}
+        backgroundColor={themes.auth.background}
+      >
         {/* header */}
-        <ModalHeader>
+        <ModalHeader color={themes.auth.textPrimary}>
           {isSignUpActive ? 'Create your account' : 'Sign in to Qwitter'}
         </ModalHeader>
-        <ModalCloseButton />
+        <ModalCloseButton color={themes.auth.textPrimary} />
 
         {/* body */}
         <Formik
@@ -159,25 +166,33 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
           {(formik) => (
             <Form>
               <Box>
-                <ModalBody>
+                <ModalBody color={themes.auth.textSecondary}>
                   {isSignUpActive && (
                     <Box>
                       <CustomInput
+                        borderColor={'whiteAlpha.300'}
                         name="name"
                         label="Name"
                         mb={4}
                         reference={nameRef}
                       />
-                      <CustomInput name="username" label="Username" mb={4} />
+                      <CustomInput
+                        borderColor={'whiteAlpha.300'}
+                        name="username"
+                        label="Username"
+                        mb={4}
+                      />
                     </Box>
                   )}
                   <CustomInput
+                    borderColor={'whiteAlpha.300'}
                     name="email"
                     label="Email"
                     mb={4}
                     reference={emailRef}
                   />
                   <CustomInput
+                    borderColor={'whiteAlpha.300'}
                     name="password"
                     label="Password"
                     type="password"
@@ -186,6 +201,8 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
 
                 <ModalFooter>
                   <Button
+                    backgroundColor={themes.auth.textPrimary}
+                    color={themes.auth.background}
                     isLoading={formik.isSubmitting}
                     isFullWidth
                     borderRadius={'full'}

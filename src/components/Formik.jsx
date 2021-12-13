@@ -15,6 +15,7 @@ export const CustomInput = ({ label, ...props }) => {
       <FormControl isInvalid={meta.touched && !!meta.error}>
         <FormLabel mb={0}>{label}</FormLabel>
         <Input
+          borderColor={props.borderColor}
           {...field}
           placeholder={label}
           ref={props.reference}
