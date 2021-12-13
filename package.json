@@ -11,6 +11,7 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@reduxjs/toolkit": "^1.7.0",
+    "dayjs": "^1.10.7",
     "firebase": "^9.6.1",
     "formik": "^2.2.9",
     "framer-motion": "^4.1.17",

@@ -1,10 +1,8 @@
 import { onAuthStateChanged } from 'firebase/auth';
-import { useEffect, useState } from 'react';
-import { auth } from './firebase';
+import { useEffect } from 'react';
+import { auth, db } from './firebase';
 import { useDispatch } from 'react-redux';
 import {
-  login,
-  logout,
   resetAuthState,
   setCurrentUser,
   setAuthenticated,
@@ -13,9 +11,14 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AuthPage from './routes/AuthPage';
 import HomePage from './routes/HomePage';
 import PrivateRoute from './routes/PrivateRoute';
+import { listenToUsers } from './store/userSlice';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { useSelector } from 'react-redux';
+import { listenToPosts } from './store/postSlice';
 
 function App() {
   const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   // this will every time the auth state changes
   useEffect(() => {
@@ -36,7 +39,47 @@ function App() {
     return () => sub();
   }, []);
 
-  const renderRoutes = () => (
+  useEffect(() => {
+    const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+
+    let unsubscribe;
+    if (isAuthenticated) {
+      unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const users = [];
+        querySnapshot.forEach((doc) => {
+          users.push({
+            id: doc.id,
+            ...doc.data(),
+          });
+        });
+        dispatch(listenToUsers(users));
+      });
+    }
+
+    return () => unsubscribe();
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+
+    let unsubscribe;
+    if (isAuthenticated) {
+      unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const posts = [];
+        querySnapshot.forEach((doc) => {
+          posts.push({
+            id: doc.id,
+            ...doc.data(),
+          });
+        });
+        dispatch(listenToPosts(posts));
+      });
+    }
+
+    return () => unsubscribe();
+  }, [isAuthenticated]);
+
+  return (
     <BrowserRouter>
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
@@ -51,28 +94,6 @@ function App() {
       </Routes>
     </BrowserRouter>
   );
-
-  return renderRoutes();
-  // return (
-  //   <div>
-  //     <button
-  //       onClick={async () => {
-  //         dispatch(
-  //           login({ email: 'iam.amanxz@gmail.com', password: 'test123#' }),
-  //         );
-  //       }}
-  //     >
-  //       SignIn
-  //     </button>
-  //     <button
-  //       onClick={async () => {
-  //         dispatch(logout());
-  //       }}
-  //     >
-  //       Signout
-  //     </button>
-  //   </div>
-  // );
 }
 
 export default App;

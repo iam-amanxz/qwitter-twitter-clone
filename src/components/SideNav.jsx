@@ -9,7 +9,6 @@ import {
   useMediaQuery,
   SkeletonCircle,
   SkeletonText,
-  Skeleton,
 } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import {
@@ -25,6 +24,7 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '../context/themeContext';
 import LogoutModal from './LogoutModal';
 import ThemeModal from './ThemeModal';
+import TweetModal from './TweetModal';
 
 const NavButton = ({ icon, title, ...props }) => {
   const [isLg] = useMediaQuery('(min-width: 992px)');
@@ -72,7 +72,7 @@ const UserHeader = () => {
               {currentUser?.name}
             </Heading>
 
-            <Text fontSize="xs" color={baseTheme.textSecondaryColor}>
+            <Text fontSize="sm" color={baseTheme.textSecondaryColor}>
               @{currentUser?.username}
             </Text>
           </Box>
@@ -89,6 +89,7 @@ const SideNav = () => {
   const [isLg] = useMediaQuery('(min-width: 992px)');
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isTweetModalOpen, setIsTweetModalOpen] = useState(false);
 
   const links = [
     { icon: <FiHome fontSize={'1.3em'} />, title: 'Home' },
@@ -124,6 +125,7 @@ const SideNav = () => {
           _hover={{ backgroundColor: accentTheme.accentHoverColor }}
           color={'white'}
           iconSpacing={0}
+          onClick={() => setIsTweetModalOpen(true)}
         >
           {isLg && 'Tweet'}
         </Button>
@@ -136,6 +138,10 @@ const SideNav = () => {
       <LogoutModal
         isLogoutModalOpen={isLogoutModalOpen}
         setIsLogoutModalOpen={setIsLogoutModalOpen}
+      />
+      <TweetModal
+        isTweetModalOpen={isTweetModalOpen}
+        setIsTweetModalOpen={setIsTweetModalOpen}
       />
     </Box>
   );
