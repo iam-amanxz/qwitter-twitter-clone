@@ -1,4 +1,12 @@
-import { Avatar, Box, Flex, Heading, Stack, Text } from '@chakra-ui/react';
+import {
+  Avatar,
+  Box,
+  Flex,
+  Heading,
+  Image,
+  Stack,
+  Text,
+} from '@chakra-ui/react';
 import { FiHeart } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/themeContext';
@@ -44,6 +52,17 @@ const Post = ({ post }) => {
           <Text fontSize={'sm'} color={baseTheme.textPrimaryColor}>
             {post?.body}
           </Text>
+
+          {post?.imageUrl && (
+            <Image
+              src={post.imageUrl}
+              w={'full'}
+              maxH={'xs'}
+              borderRadius={'lg'}
+              mt={4}
+              fit={'cover'}
+            />
+          )}
         </Box>
 
         {/* Likes */}

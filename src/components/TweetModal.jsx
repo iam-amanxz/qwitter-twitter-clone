@@ -1,12 +1,12 @@
 import {
   Box,
   Button,
-  Circle,
   CircularProgress,
   Flex,
   FormControl,
-  Heading,
+  Progress,
   Image,
+  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -14,42 +14,121 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Stack,
-  Text,
   Textarea,
   useDisclosure,
   useToast,
+  Circle,
 } from '@chakra-ui/react';
 import { useRef, useState } from 'react';
-import { FiCamera } from 'react-icons/fi';
+import { FiImage, FiX } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { useTheme } from '../context/themeContext';
-import { createPost } from '../store/postSlice';
+import { createPost, uploadPostImage } from '../store/postSlice';
 import { showToast } from '../utils';
+import { ref } from 'firebase/storage';
+import { storage } from '../firebase.js';
+import { v4 as uuid } from 'uuid';
 
 const TweetModal = ({ isTweetModalOpen, setIsTweetModalOpen }) => {
   const dispatch = useDispatch();
   const { baseTheme, accentTheme } = useTheme();
   const { onClose } = useDisclosure();
   const { currentUser } = useSelector((state) => state.auth);
-  const { isLoading } = useSelector((state) => state.posts);
   const toast = useToast();
 
   const bodyRef = useRef();
+  const imageInputRef = useRef();
   const [bodyLimit, setBodyLimit] = useState(140);
+  const [imageSelected, setImageSelected] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const maxImageSize = 2 * 1024 * 1024; // 2mb
+  const [loading, setLoading] = useState(false);
+
+  console.log('imageUrl', imageUrl);
 
   const handleClose = () => {
+    setImageSelected(false);
+    setImageUrl('');
+    imageInputRef.current.files = null;
+
     onClose();
     setIsTweetModalOpen(false);
   };
 
+  const handleRemoveSelectedImage = () => {
+    setImageSelected(false);
+    setImageUrl('');
+    imageInputRef.current.files = null;
+  };
+
+  const handleSelectImage = () => {
+    setImageSelected(false);
+
+    const file = imageInputRef.current.files[0];
+    const fileSize = file.size;
+
+    if (fileSize > maxImageSize) {
+      showToast(toast, {
+        status: 'warning',
+        description: 'Image size is too large, max size is 2mb',
+      });
+      imageInputRef.current.files = null;
+      return;
+    }
+
+    if (file) {
+      console.log('image selected');
+      setImageUrl(URL.createObjectURL(file));
+      setImageSelected(true);
+    }
+  };
+
+  const uploadImage = () => {
+    return new Promise((resolve, reject) => {
+      const postsPicsStorageRef = ref(storage, `coverPics/${uuid()}`);
+
+      uploadPostImage(
+        postsPicsStorageRef,
+        imageInputRef.current.files[0],
+        (progress) => {
+          setUploadProgress(progress);
+        },
+        (error) => {
+          console.log(error);
+          reject(error);
+        },
+        (url) => {
+          setUploadProgress(0);
+          resolve(url);
+        },
+      );
+    });
+  };
+
   const handleCreateTweet = async () => {
+    setLoading(true);
     const body = bodyRef.current.value;
     const post = {
       body,
       owner: currentUser.username,
     };
+
+    if (imageSelected) {
+      console.log('uploading image');
+
+      try {
+        const url = await uploadImage();
+        post.imageUrl = url;
+      } catch (error) {
+        showToast(toast, {
+          status: 'error',
+          description: 'Error uploading image',
+        });
+        setLoading(false);
+      }
+    }
 
     const res = await dispatch(createPost(post));
 
@@ -58,15 +137,17 @@ const TweetModal = ({ isTweetModalOpen, setIsTweetModalOpen }) => {
         status: 'error',
         description: res.error,
       });
+      setLoading(false);
       return;
     }
 
     console.log('success creating post');
+    showToast(toast, {
+      description: 'Your tweet was sent!',
+    });
+    setLoading(false);
     handleClose();
   };
-
-  const src =
-    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcnyHcErjXASFe1Imj6U_2lmC6xN-UCNyNKuIvSB21UX3ooLyEgBXgnNWo2TBz6pE9gME&usqp=CAU';
 
   return (
     <Modal
@@ -77,11 +158,17 @@ const TweetModal = ({ isTweetModalOpen, setIsTweetModalOpen }) => {
       <ModalOverlay backgroundColor={baseTheme.overlayColor} />
 
       <ModalContent
+        overflow={'hidden'}
         mx={4}
         maxW={'md'}
         borderRadius={'2xl'}
         backgroundColor={baseTheme.backgroundColor}
       >
+        <Progress
+          value={uploadProgress}
+          size={'sm'}
+          display={uploadProgress > 0 ? 'block' : 'none'}
+        />
         <ModalHeader>
           <ModalCloseButton color={baseTheme.textPrimaryColor} />
         </ModalHeader>
@@ -102,14 +189,39 @@ const TweetModal = ({ isTweetModalOpen, setIsTweetModalOpen }) => {
             />
           </FormControl>
 
-          <Image
-            src={src}
-            w={'full'}
-            h={'56'}
-            borderRadius={'lg'}
-            mt={4}
-            fit={'cover'}
+          <Input
+            type={'file'}
+            ref={imageInputRef}
+            display={'none'}
+            onChangeCapture={handleSelectImage}
+            accept="image/jpeg,image/png,image/jpg"
           />
+
+          {imageSelected && (
+            <Box position={'relative'}>
+              <Image
+                src={imageUrl}
+                w={'full'}
+                h={'56'}
+                borderRadius={'lg'}
+                mt={4}
+                fit={'cover'}
+              />
+
+              <Circle
+                boxShadow={'md'}
+                onClick={handleRemoveSelectedImage}
+                position={'absolute'}
+                cursor={'pointer'}
+                top={2}
+                right={2}
+                p={2}
+                backgroundColor={'white'}
+              >
+                <FiX />
+              </Circle>
+            </Box>
+          )}
         </ModalBody>
 
         <ModalFooter borderColor={baseTheme.borderColor} borderTopWidth={'1px'}>
@@ -118,12 +230,13 @@ const TweetModal = ({ isTweetModalOpen, setIsTweetModalOpen }) => {
             alignItems={'center'}
             flexGrow={1}
           >
-            <FiCamera
+            {/* Camera */}
+            <FiImage
               size={20}
               color={accentTheme.accentColor}
               cursor={'pointer'}
+              onClick={() => imageInputRef.current.click()}
             />
-            {/* Camera */}
 
             <Box>
               {bodyRef.current?.value && (
@@ -137,7 +250,7 @@ const TweetModal = ({ isTweetModalOpen, setIsTweetModalOpen }) => {
               )}
               <Button
                 disabled={!bodyRef.current?.value}
-                isLoading={isLoading}
+                isLoading={loading}
                 backgroundColor={accentTheme.accentColor}
                 color={accentTheme.textColor}
                 _hover={{ backgroundColor: accentTheme.accentHoverColor }}

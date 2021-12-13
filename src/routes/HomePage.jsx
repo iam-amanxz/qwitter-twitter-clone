@@ -40,7 +40,7 @@ const HomePostsList = () => {
   if (isLoading) {
     return (
       <Box>
-        {[...Array(10)].map((el, index) => (
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((el, index) => (
           <Stack direction={'row'} p={5} key={index}>
             <SkeletonCircle size={'20'} mr={3} flexShrink={0} />
             <SkeletonText width={'full'} />

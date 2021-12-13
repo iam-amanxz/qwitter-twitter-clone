@@ -9,12 +9,38 @@ import {
   setDoc,
   where,
 } from 'firebase/firestore';
+import { getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 import { db, auth } from '../firebase';
 
 const initialState = {
   posts: [],
   error: null,
   isLoading: true,
+};
+
+export const uploadPostImage = async (
+  storageRef,
+  file,
+  onUpload,
+  onError,
+  onComplete,
+) => {
+  const uploadTask = uploadBytesResumable(storageRef, file);
+
+  await uploadTask.on(
+    'state_changed',
+    (snapshot) => {
+      onUpload((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+    },
+    (error) => {
+      onError(error);
+    },
+    () => {
+      getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+        onComplete(downloadURL);
+      });
+    },
+  );
 };
 
 export const listenToPosts = createAsyncThunk(
@@ -32,7 +58,7 @@ export const createPost = createAsyncThunk(
     try {
       const post = {
         body: req.body,
-        imageUrl: null,
+        imageUrl: req.imageUrl || null,
         likes: [],
         owner: req.owner,
         createdAt: new Date().toISOString(),
@@ -70,7 +96,6 @@ export const postSlice = createSlice({
       state.isLoading = true;
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
-      state.posts.push(action.payload);
       state.isLoading = false;
     });
     builder.addCase(createPost.rejected, (state, action) => {

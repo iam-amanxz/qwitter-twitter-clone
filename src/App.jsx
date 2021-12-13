@@ -42,9 +42,8 @@ function App() {
   useEffect(() => {
     const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
 
-    let unsubscribe;
     if (isAuthenticated) {
-      unsubscribe = onSnapshot(q, (querySnapshot) => {
+      let unsubscribe = onSnapshot(q, (querySnapshot) => {
         const users = [];
         querySnapshot.forEach((doc) => {
           users.push({
@@ -54,17 +53,16 @@ function App() {
         });
         dispatch(listenToUsers(users));
       });
-    }
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    }
   }, [isAuthenticated]);
 
   useEffect(() => {
     const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
 
-    let unsubscribe;
     if (isAuthenticated) {
-      unsubscribe = onSnapshot(q, (querySnapshot) => {
+      let unsubscribe = onSnapshot(q, (querySnapshot) => {
         const posts = [];
         querySnapshot.forEach((doc) => {
           posts.push({
@@ -74,9 +72,8 @@ function App() {
         });
         dispatch(listenToPosts(posts));
       });
+      return () => unsubscribe();
     }
-
-    return () => unsubscribe();
   }, [isAuthenticated]);
 
   return (

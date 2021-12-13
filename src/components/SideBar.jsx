@@ -34,18 +34,10 @@ const UserDetail = ({ user }) => {
 
       <Box flexGrow={1}>
         <Link to={`/${user.username}`}>
-          <Heading
-            size="sm"
-            color={'whiteAlpha.900'}
-            color={baseTheme.textPrimaryColor}
-          >
+          <Heading size="sm" color={baseTheme.textPrimaryColor}>
             {user.name}
           </Heading>
-          <Text
-            fontSize="sm"
-            color={'whiteAlpha.900'}
-            color={baseTheme.textSecondaryColor}
-          >
+          <Text fontSize="sm" color={baseTheme.textSecondaryColor}>
             @{user.username}
           </Text>
         </Link>
