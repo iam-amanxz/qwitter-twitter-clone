@@ -25,7 +25,7 @@ const AuthPage = () => {
       />
 
       <Center
-        backgroundColor={baseTheme.background}
+        backgroundColor={baseTheme.backgroundColor}
         flexGrow={1}
         p={10}
         flexDir={'column'}

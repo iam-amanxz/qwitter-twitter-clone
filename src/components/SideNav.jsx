@@ -20,6 +20,7 @@ import {
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/themeContext';
+import LogoutModal from './LogoutModal';
 import ThemeModal from './ThemeModal';
 
 const NavButton = ({ icon, title, ...props }) => {
@@ -77,6 +78,7 @@ const SideNav = () => {
     useTheme();
   const [isLg] = useMediaQuery('(min-width: 992px)');
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const links = [
     { icon: <FiHome fontSize={'1.3em'} />, title: 'Home' },
@@ -87,7 +89,11 @@ const SideNav = () => {
       onClick: () => setIsThemeModalOpen(true),
     },
     { icon: <FiUser fontSize={'1.3em'} />, title: 'Profile' },
-    { icon: <FiPower fontSize={'1.3em'} />, title: 'Logout' },
+    {
+      icon: <FiPower fontSize={'1.3em'} />,
+      title: 'Logout',
+      onClick: () => setIsLogoutModalOpen(true),
+    },
   ];
 
   return (
@@ -116,6 +122,10 @@ const SideNav = () => {
       <ThemeModal
         isThemeModalOpen={isThemeModalOpen}
         setIsThemeModalOpen={setIsThemeModalOpen}
+      />
+      <LogoutModal
+        isLogoutModalOpen={isLogoutModalOpen}
+        setIsLogoutModalOpen={setIsLogoutModalOpen}
       />
     </Box>
   );
