@@ -12,7 +12,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
@@ -25,7 +25,7 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
   const toast = useToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { themes } = useTheme();
+  const { baseTheme, accentTheme } = useTheme();
 
   const nameRef = useRef();
   const emailRef = useRef();
@@ -143,19 +143,19 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
       onClose={handleClose}
       initialFocusRef={isSignUpActive ? nameRef : emailRef}
     >
-      <ModalOverlay backgroundColor={themes.auth.overlay} />
+      <ModalOverlay backgroundColor={baseTheme.overlayColor} />
 
       <ModalContent
         mx={4}
         maxW={'sm'}
         borderRadius={'2xl'}
-        backgroundColor={themes.auth.background}
+        backgroundColor={baseTheme.backgroundColor}
       >
         {/* header */}
-        <ModalHeader color={themes.auth.textPrimary}>
+        <ModalHeader color={baseTheme.textPrimaryColor}>
           {isSignUpActive ? 'Create your account' : 'Sign in to Qwitter'}
         </ModalHeader>
-        <ModalCloseButton color={themes.auth.textPrimary} />
+        <ModalCloseButton color={baseTheme.textPrimaryColor} />
 
         {/* body */}
         <Formik
@@ -166,18 +166,18 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
           {(formik) => (
             <Form>
               <Box>
-                <ModalBody color={themes.auth.textSecondary}>
+                <ModalBody color={baseTheme.textSecondaryColor}>
                   {isSignUpActive && (
                     <Box>
                       <CustomInput
-                        borderColor={'whiteAlpha.300'}
+                        borderColor={baseTheme.borderColor}
                         name="name"
                         label="Name"
                         mb={4}
                         reference={nameRef}
                       />
                       <CustomInput
-                        borderColor={'whiteAlpha.300'}
+                        borderColor={baseTheme.borderColor}
                         name="username"
                         label="Username"
                         mb={4}
@@ -185,14 +185,14 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
                     </Box>
                   )}
                   <CustomInput
-                    borderColor={'whiteAlpha.300'}
+                    borderColor={baseTheme.borderColor}
                     name="email"
                     label="Email"
                     mb={4}
                     reference={emailRef}
                   />
                   <CustomInput
-                    borderColor={'whiteAlpha.300'}
+                    borderColor={baseTheme.borderColor}
                     name="password"
                     label="Password"
                     type="password"
@@ -201,8 +201,8 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
 
                 <ModalFooter>
                   <Button
-                    backgroundColor={themes.auth.textPrimary}
-                    color={themes.auth.background}
+                    backgroundColor={accentTheme.accentColor}
+                    color={accentTheme.textColor}
                     isLoading={formik.isSubmitting}
                     isFullWidth
                     borderRadius={'full'}

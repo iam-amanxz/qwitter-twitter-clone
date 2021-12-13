@@ -5,7 +5,7 @@ import AuthModal from '../components/AuthModal';
 import { useTheme } from '../context/themeContext';
 
 const AuthPage = () => {
-  const { themes } = useTheme();
+  const { baseTheme, accentTheme } = useTheme();
 
   // const coverImage =
   //   'https://images.unsplash.com/photo-1634334181759-a965220b6a91?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1099&q=80';
@@ -25,24 +25,24 @@ const AuthPage = () => {
       />
 
       <Center
-        backgroundColor={themes.auth.background}
+        backgroundColor={baseTheme.background}
         flexGrow={1}
         p={10}
         flexDir={'column'}
         alignItems={{ base: 'center', md: 'start' }}
       >
-        <Heading size="3xl" mb={14} color={themes.auth.textPrimary}>
+        <Heading size="3xl" mb={14} color={baseTheme.textPrimaryColor}>
           Happening now
         </Heading>
-        <Heading size="xl" mb={16} color={themes.auth.textPrimary}>
+        <Heading size="xl" mb={16} color={baseTheme.textPrimaryColor}>
           Join Qwitter today.
         </Heading>
 
         <Stack spacing={4}>
           <Button
-            color={themes.auth.textSecondary}
-            backgroundColor={themes.auth.accent}
-            _hover={{ backgroundColor: themes.auth.accentHover }}
+            color={accentTheme.textColor}
+            backgroundColor={accentTheme.accentColor}
+            _hover={{ backgroundColor: accentTheme.accentHoverColor }}
             px={12}
             borderRadius={'full'}
             onClick={() => {
@@ -53,9 +53,12 @@ const AuthPage = () => {
             Sign up with email
           </Button>
           <Button
-            color={themes.auth.accent}
-            borderColor={themes.auth.accent}
-            _hover={{ backgroundColor: themes.auth.backgroundHover }}
+            color={accentTheme.accentColor}
+            borderColor={accentTheme.accentColor}
+            _hover={{
+              backgroundColor: accentTheme.accentHoverColor,
+              color: accentTheme.textColor,
+            }}
             px={12}
             borderRadius={'full'}
             variant="outline"
