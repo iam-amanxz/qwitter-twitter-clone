@@ -154,6 +154,8 @@ const TweetModal = ({ isTweetModalOpen, setIsTweetModalOpen }) => {
       isOpen={isTweetModalOpen}
       onClose={handleClose}
       initialFocusRef={bodyRef}
+      closeOnEsc={false}
+      closeOnOverlayClick={false}
     >
       <ModalOverlay backgroundColor={baseTheme.overlayColor} />
 
@@ -170,7 +172,7 @@ const TweetModal = ({ isTweetModalOpen, setIsTweetModalOpen }) => {
           display={uploadProgress > 0 ? 'block' : 'none'}
         />
         <ModalHeader>
-          <ModalCloseButton color={baseTheme.textPrimaryColor} />
+          {!loading && <ModalCloseButton color={baseTheme.textPrimaryColor} />}
         </ModalHeader>
 
         <ModalBody>
