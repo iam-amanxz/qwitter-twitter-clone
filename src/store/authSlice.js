@@ -19,7 +19,7 @@ const initialState = {
   currentUser: [],
   isAuthenticated: JSON.parse(localStorage.getItem('authenticated')),
   error: null,
-  isLoading: null,
+  isLoading: true,
 };
 
 export const setCurrentUser = createAsyncThunk(
@@ -119,15 +119,17 @@ export const authSlice = createSlice({
   initialState,
   reducers: {
     resetAuthState: () => initialState,
+    setAuthenticated: (state, action) => {
+      state.isAuthenticated = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(setCurrentUser.pending, (state, action) => {
       state.isLoading = true;
     });
     builder.addCase(setCurrentUser.fulfilled, (state, action) => {
-      state.isLoading = false;
       state.currentUser = action.payload;
-      state.isAuthenticated = true;
+      state.isLoading = false;
       state.error = null;
     });
     builder.addCase(setCurrentUser.rejected, (state, action) => {
@@ -175,5 +177,5 @@ export const authSlice = createSlice({
   },
 });
 
-export const { resetAuthState } = authSlice.actions;
+export const { resetAuthState, setAuthenticated } = authSlice.actions;
 export default authSlice.reducer;

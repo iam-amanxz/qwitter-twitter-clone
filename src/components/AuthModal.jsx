@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import { useTheme } from '../context/themeContext';
 import { login, register } from '../store/authSlice';
+import { showToast } from '../utils';
 import { CustomInput } from './Formik';
 
 const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
@@ -29,17 +30,6 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
 
   const nameRef = useRef();
   const emailRef = useRef();
-
-  const showToast = ({ title, description, status, duration, position }) => {
-    toast({
-      title: title,
-      description: description && description,
-      status: status || 'success',
-      duration: duration || 2000,
-      isClosable: true,
-      position: position && position,
-    });
-  };
 
   const handleClose = () => {
     onClose();
@@ -94,7 +84,8 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
         login({ email: values.email, password: values.password }),
       );
       if (res.error) {
-        showToast({
+        showToast(toast, {
+          status: 'error',
           title: 'Error',
           description: res.payload,
         });
@@ -124,7 +115,8 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
       );
 
       if (res.error) {
-        showToast({
+        showToast(toast, {
+          status: 'error',
           title: 'Error',
           description: res.payload,
         });

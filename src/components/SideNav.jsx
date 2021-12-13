@@ -7,6 +7,9 @@ import {
   Stack,
   Text,
   useMediaQuery,
+  SkeletonCircle,
+  SkeletonText,
+  Skeleton,
 } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import {
@@ -47,26 +50,34 @@ const NavButton = ({ icon, title, ...props }) => {
 const UserHeader = () => {
   const { baseTheme } = useTheme();
   const [isLg] = useMediaQuery('(min-width: 992px)');
-  const { currentUser } = useSelector((state) => state.auth);
+  const { currentUser, isLoading } = useSelector((state) => state.auth);
 
   return (
     <Link to="">
       <Flex mb={5} alignItems={'center'}>
-        <Avatar
-          src={currentUser?.profilePicUrl && currentUser.profilePicUrl}
-          name={currentUser?.name}
-          size="md"
-          mr={isLg && 3}
-        />
-        {isLg && (
+        {isLoading ? (
+          <SkeletonCircle size={'50px'} mr={isLg && 3} />
+        ) : (
+          <Avatar
+            src={currentUser?.profilePicUrl && currentUser.profilePicUrl}
+            name={currentUser?.name}
+            size="md"
+            mr={isLg && 3}
+          />
+        )}
+
+        {isLg && !isLoading ? (
           <Box>
             <Heading size="sm" color={baseTheme.textPrimaryColor}>
               {currentUser?.name}
             </Heading>
+
             <Text fontSize="xs" color={baseTheme.textSecondaryColor}>
               @{currentUser?.username}
             </Text>
           </Box>
+        ) : (
+          <SkeletonText width={isLg ? '60%' : 'max'} />
         )}
       </Flex>
     </Link>
@@ -74,8 +85,7 @@ const UserHeader = () => {
 };
 
 const SideNav = () => {
-  const { baseTheme, setBaseTheme, accentTheme, setAccentTheme, themes } =
-    useTheme();
+  const { accentTheme } = useTheme();
   const [isLg] = useMediaQuery('(min-width: 992px)');
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);

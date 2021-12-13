@@ -7,6 +7,7 @@ import {
   logout,
   resetAuthState,
   setCurrentUser,
+  setAuthenticated,
 } from './store/authSlice';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AuthPage from './routes/AuthPage';
@@ -21,9 +22,11 @@ function App() {
     const sub = onAuthStateChanged(auth, (user) => {
       if (user) {
         // if user is logged in set the current user
+        dispatch(setAuthenticated(true));
         dispatch(setCurrentUser());
         localStorage.setItem('authenticated', true);
       } else {
+        dispatch(setAuthenticated(false));
         // if user is logged out reset the auth state
         localStorage.removeItem('authenticated');
         dispatch(resetAuthState());
