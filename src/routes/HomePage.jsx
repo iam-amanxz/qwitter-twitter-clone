@@ -12,6 +12,7 @@ import {
 import { useTheme } from '../context/themeContext';
 import { useSelector } from 'react-redux';
 import Post from '../components/Post';
+import { AnimatePresence } from 'framer-motion';
 
 const HomeHeader = () => {
   const { baseTheme } = useTheme();
@@ -63,7 +64,13 @@ const HomePostsList = () => {
     );
   }
 
-  return posts.map((post) => <Post key={post.id} post={post} />);
+  return (
+    <AnimatePresence>
+      {posts.map((post) => (
+        <Post key={post.id} post={post} />
+      ))}
+    </AnimatePresence>
+  );
 };
 
 const renderCenter = () => {
