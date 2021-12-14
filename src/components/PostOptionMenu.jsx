@@ -4,13 +4,26 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  useToast,
 } from '@chakra-ui/react';
 import { FiMoreHorizontal, FiTrash2 } from 'react-icons/fi';
+import { useDispatch } from 'react-redux';
 import { useTheme } from '../context/themeContext';
+import { deletePost } from '../store/postSlice';
+import { showToast } from '../utils';
 
-const PostOptionMenu = ({ setOpenDeleteConfirmDialog }) => {
-  const handleInitiateDelete = () => {
-    setOpenDeleteConfirmDialog(true);
+const PostOptionMenu = ({ post }) => {
+  const dispatch = useDispatch();
+  const toast = useToast();
+
+  const handleInitiateDelete = async () => {
+    const res = await dispatch(deletePost(post.id));
+    if (res.error) {
+      showToast(toast, {
+        status: 'error',
+        description: res.error,
+      });
+    }
   };
   const { baseTheme } = useTheme();
 

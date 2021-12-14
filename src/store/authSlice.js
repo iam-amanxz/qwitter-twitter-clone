@@ -16,7 +16,7 @@ import {
 import { db, auth } from '../firebase';
 
 const initialState = {
-  currentUser: [],
+  currentUser: null,
   isAuthenticated: JSON.parse(localStorage.getItem('authenticated')),
   error: null,
   isLoading: true,

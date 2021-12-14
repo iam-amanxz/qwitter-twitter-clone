@@ -1,4 +1,3 @@
-import { async } from '@firebase/util';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
   addDoc,
@@ -14,12 +13,6 @@ import {
 } from 'firebase/firestore';
 import { getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 import { db } from '../firebase';
-
-const initialState = {
-  posts: [],
-  error: null,
-  isLoading: false,
-};
 
 export const uploadPostImage = async (
   storageRef,
@@ -138,10 +131,37 @@ export const deletePost = createAsyncThunk(
   },
 );
 
+const initialState = {
+  posts: [],
+  error: null,
+  isLoading: true,
+};
+
 export const postSlice = createSlice({
   name: 'posts',
   initialState,
   reducers: {
+    setPosts: (state, action) => {
+      state.posts = action.payload;
+      state.isLoading = false;
+    },
+    modifyPost: (state, action) => {
+      const post = action.payload;
+      const postIndex = state.posts.findIndex((p) => p.id === post.id);
+      state.posts[postIndex] = post;
+    },
+    removePost: (state, action) => {
+      const postId = action.payload;
+      const posts = state.posts.filter((post) => post.id !== postId);
+      state.posts = posts;
+    },
+    addPost: (state, action) => {
+      const exist = state.posts.find((post) => post.id === action.payload.id);
+      if (!exist) {
+        state.posts.unshift(action.payload);
+        state.isLoading = false;
+      }
+    },
     resetPostState: () => initialState,
   },
   extraReducers: (builder) => {
@@ -149,7 +169,7 @@ export const postSlice = createSlice({
       // state.isLoading = true;
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
-      state.posts.unshift(action.payload);
+      // state.posts.unshift(action.payload);
       // state.isLoading = false;
     });
     builder.addCase(createPost.rejected, (state, action) => {
@@ -163,8 +183,8 @@ export const postSlice = createSlice({
       // state.isLoading = true;
     });
     builder.addCase(likePost.fulfilled, (state, action) => {
-      const post = state.posts.find((p) => p.id === action.payload.postId);
-      post.likes.push(action.payload.username);
+      // const post = state.posts.find((p) => p.id === action.payload.postId);
+      // post.likes.push(action.payload.username);
       // state.isLoading = false;
     });
     builder.addCase(likePost.rejected, (state, action) => {
@@ -178,8 +198,8 @@ export const postSlice = createSlice({
       // state.isLoading = true;
     });
     builder.addCase(unlikePost.fulfilled, (state, action) => {
-      const post = state.posts.find((p) => p.id === action.payload.postId);
-      post.likes = post.likes.filter((l) => l !== action.payload.username);
+      // const post = state.posts.find((p) => p.id === action.payload.postId);
+      // post.likes = post.likes.filter((l) => l !== action.payload.username);
       // state.isLoading = false;
     });
     builder.addCase(unlikePost.rejected, (state, action) => {
@@ -207,7 +227,7 @@ export const postSlice = createSlice({
       // state.isLoading = true;
     });
     builder.addCase(deletePost.fulfilled, (state, action) => {
-      state.posts = state.posts.filter((p) => p.id !== action.payload);
+      // state.posts = state.posts.filter((p) => p.id !== action.payload);
       // state.isLoading = false;
     });
     builder.addCase(deletePost.rejected, (state, action) => {
@@ -217,7 +237,8 @@ export const postSlice = createSlice({
   },
 });
 
-export const { resetPostState } = postSlice.actions;
+export const { resetPostState, addPost, removePost, modifyPost, setPosts } =
+  postSlice.actions;
 export default postSlice.reducer;
 
 // builder.addCase(listenToPosts.pending, (state, action) => {

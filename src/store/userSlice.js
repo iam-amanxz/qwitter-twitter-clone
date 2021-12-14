@@ -1,22 +1,20 @@
-import { async } from '@firebase/util';
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import {
+  createAsyncThunk,
+  createDraftSafeSelector,
+  createSlice,
+} from '@reduxjs/toolkit';
 import {
   arrayRemove,
   arrayUnion,
   collection,
   doc,
+  getDoc,
   getDocs,
   orderBy,
   query,
   updateDoc,
 } from 'firebase/firestore';
-import { db } from '../firebase';
-
-const initialState = {
-  users: [],
-  error: null,
-  isLoading: false,
-};
+import { db, auth } from '../firebase';
 
 export const fetchUsers = createAsyncThunk(
   'fetchUsers',
@@ -80,10 +78,38 @@ export const unfollowUser = createAsyncThunk(
   },
 );
 
+const initialState = {
+  users: [],
+  user: null,
+  error: null,
+  isLoading: false,
+};
+
 export const userSlice = createSlice({
   name: 'users',
   initialState,
   reducers: {
+    setUsers: (state, action) => {
+      state.users = action.payload;
+      state.isLoading = false;
+    },
+    addUser: (state, action) => {
+      const exist = state.users.find((user) => user.id === action.payload.id);
+      if (!exist) {
+        state.users.unshift(action.payload);
+        state.isLoading = false;
+      }
+    },
+    modifyUser: (state, action) => {
+      const user = action.payload;
+      const userIndex = state.users.findIndex((u) => u.id === user.id);
+      state.users[userIndex] = user;
+    },
+    removeUser: (state, action) => {
+      const userId = action.payload;
+      const users = state.users.filter((user) => user.id !== userId);
+      state.users = users;
+    },
     resetUserState: () => initialState,
   },
   extraReducers: (builder) => {
@@ -139,7 +165,8 @@ export const userSlice = createSlice({
   },
 });
 
-export const { resetUserState } = userSlice.actions;
+export const { resetUserState, addUser, removeUser, modifyUser, setUsers } =
+  userSlice.actions;
 export default userSlice.reducer;
 
 // builder.addCase(listenToUsers.pending, (state, action) => {
@@ -161,3 +188,15 @@ export default userSlice.reducer;
 //     return req;
 //   },
 // );
+
+// export const userSelector = (state) =>
+//   state.users.find((u) => u.id === auth.currentUser.uid);
+
+// const unsafeSelector = createSelector(selectSelf, (state) => state.value)
+
+const selectSelf = (state) => state;
+
+export const userSelector = createDraftSafeSelector(selectSelf, (state) => {
+  const user = state.users.users.find((u) => u.id === auth.currentUser.uid);
+  return user;
+});

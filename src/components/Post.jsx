@@ -32,8 +32,6 @@ const Post = memo(
     const { currentUser } = useSelector((state) => state.auth);
     const toast = useToast();
     const dispatch = useDispatch();
-    const [openDeleteConfirmDialog, setOpenDeleteConfirmDialog] =
-      useState(false);
 
     const owner = users.find((user) => user.username === post.owner);
 
@@ -73,16 +71,16 @@ const Post = memo(
 
     return (
       <MotionFlex
-        initial={{ opacity: 0, y: -100 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, rotateX: 30 }}
+        animate={{ opacity: 1, rotateX: 0 }}
         transition={{ duration: 0.5 }}
-        exit={{ opacity: 0, y: -100 }}
+        exit={{ opacity: 0, rotateX: 30 }}
         p={3}
         m={3}
         borderBottomWidth={'1px'}
         borderColor={baseTheme.borderColor}
       >
-        <Link to="">
+        <Link to={`/${owner?.username}`}>
           <Avatar
             name={owner?.name}
             size="md"
@@ -94,7 +92,7 @@ const Post = memo(
         <Flex flexGrow={1} flexDir={'column'}>
           {/* Post */}
           <Box mb={2}>
-            <Link to="">
+            <Link to={`/${owner?.username}`}>
               <Heading size="sm" color={baseTheme.textPrimaryColor} mb={1}>
                 {owner?.name || '[Deleted User]'}
                 <Text
@@ -146,17 +144,7 @@ const Post = memo(
           </Stack>
         </Flex>
 
-        {currentUser?.username === post.owner && (
-          <PostOptionMenu
-            setOpenDeleteConfirmDialog={setOpenDeleteConfirmDialog}
-          />
-        )}
-
-        <DeletePostConfirmModal
-          postId={post.id}
-          openDeleteConfirmDialog={openDeleteConfirmDialog}
-          setOpenDeleteConfirmDialog={setOpenDeleteConfirmDialog}
-        />
+        {currentUser?.username === post.owner && <PostOptionMenu post={post} />}
       </MotionFlex>
     );
   },

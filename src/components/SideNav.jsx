@@ -10,7 +10,7 @@ import {
   SkeletonCircle,
   SkeletonText,
 } from '@chakra-ui/react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FiHome,
   FiUser,
@@ -20,7 +20,7 @@ import {
   FiFeather,
 } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/themeContext';
 import LogoutModal from './LogoutModal';
 import ThemeModal from './ThemeModal';
@@ -48,11 +48,18 @@ const NavButton = ({ icon, title, ...props }) => {
 };
 
 const UserHeader = () => {
+  console.log('USER HEADER RENDERED - SIDE NAV');
   const { baseTheme } = useTheme();
   const [isLg] = useMediaQuery('(min-width: 992px)');
   const { currentUser, isLoading } = useSelector((state) => state.auth);
   const { users } = useSelector((state) => state.users);
-  const user = users.find((user) => user.id === currentUser.id);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    if (currentUser && users) {
+      setUser(users.find((user) => user.id === currentUser.id));
+    }
+  }, [currentUser, users]);
 
   return (
     <Link to="">
@@ -92,16 +99,30 @@ const SideNav = () => {
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isTweetModalOpen, setIsTweetModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const { currentUser } = useSelector((state) => state.auth);
 
   const links = [
-    { icon: <FiHome fontSize={'1.3em'} />, title: 'Home' },
-    { icon: <FiHash fontSize={'1.3em'} />, title: 'Explore' },
+    {
+      icon: <FiHome fontSize={'1.3em'} />,
+      title: 'Home',
+      onClick: () => navigate(`/`),
+    },
+    {
+      icon: <FiHash fontSize={'1.3em'} />,
+      title: 'Explore',
+      onClick: () => navigate(`/${currentUser.username}/explore/to_follow`),
+    },
     {
       icon: <FiEdit fontSize={'1.3em'} />,
       title: 'Theme',
       onClick: () => setIsThemeModalOpen(true),
     },
-    { icon: <FiUser fontSize={'1.3em'} />, title: 'Profile' },
+    {
+      icon: <FiUser fontSize={'1.3em'} />,
+      title: 'Profile',
+      onClick: () => navigate(`/${currentUser.username}`),
+    },
     {
       icon: <FiPower fontSize={'1.3em'} />,
       title: 'Logout',

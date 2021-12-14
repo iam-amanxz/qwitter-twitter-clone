@@ -8,6 +8,6 @@ export const showToast = (
     status: status || 'success',
     duration: duration || 2000,
     isClosable: true,
-    position: position && position,
+    position: position || 'bottom-right',
   });
 };

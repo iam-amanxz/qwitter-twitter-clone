@@ -61,7 +61,11 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
         username: yup
           .string()
           .required('Username is required')
-          .min(3, 'Username must be at least 3 characters'),
+          .min(3, 'Username must be at least 3 characters')
+          .matches(
+            /^[a-zA-Z0-9]*$/,
+            'Username can only contain letters and numbers, no spaces',
+          ),
         email: yup
           .string()
           .required('Email is required')

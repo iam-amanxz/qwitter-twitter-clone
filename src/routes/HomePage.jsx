@@ -13,6 +13,82 @@ import { useTheme } from '../context/themeContext';
 import { useSelector } from 'react-redux';
 import Post from '../components/Post';
 import { AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { userSelector } from '../store/userSlice';
+
+const renderCenter = () => (
+  <Box>
+    <HomeHeader />
+    <HomePostsList />
+  </Box>
+);
+
+const HomePage = () => {
+  return (
+    <MainLayout
+      left={<SideNav />}
+      center={renderCenter()}
+      right={<SideBar />}
+    />
+  );
+};
+
+const HomePostsList = () => {
+  console.log('HOME POSTS LIST RENDERED');
+  const { posts, isLoading } = useSelector((state) => state.posts);
+  const { baseTheme } = useTheme();
+  const user = useSelector(userSelector);
+
+  const [followingPosts, setFollowingPosts] = useState([]);
+
+  useEffect(() => {
+    if (user && posts.length > 0) {
+      console.log('USE EFFECT');
+      setFollowingPosts(
+        posts.filter(
+          (post) =>
+            post.owner === user.username || user.following.includes(post.owner),
+        ),
+      );
+    }
+  }, [user, posts]);
+
+  if (isLoading) {
+    return (
+      <Box>
+        {[1, 2, 3].map((el, index) => (
+          <Stack direction={'row'} p={5} key={index}>
+            <SkeletonCircle size={'16'} mr={3} flexShrink={0} />
+            <SkeletonText width={'full'} />
+          </Stack>
+        ))}
+      </Box>
+    );
+  }
+
+  if (!isLoading && followingPosts.length === 0) {
+    return (
+      <Box p={10} textAlign={'center'}>
+        <Heading size={'md'} mb={1}>
+          Woah! Such Empty.
+        </Heading>
+        <Text fontWeight={'medium'} color={baseTheme.textSecondaryColor}>
+          No posts found! Tweet something or follow a user to view the posts.
+        </Text>
+      </Box>
+    );
+  }
+
+  return (
+    <Box>
+      <AnimatePresence>
+        {followingPosts.map((post) => (
+          <Post key={post.id} post={post} />
+        ))}
+      </AnimatePresence>
+    </Box>
+  );
+};
 
 const HomeHeader = () => {
   const { baseTheme } = useTheme();
@@ -31,64 +107,6 @@ const HomeHeader = () => {
         Home
       </Heading>
     </Box>
-  );
-};
-
-const HomePostsList = () => {
-  const { posts, isLoading } = useSelector((state) => state.posts);
-  const { baseTheme } = useTheme();
-
-  if (isLoading) {
-    return (
-      <Box>
-        {[1, 2, 3].map((el, index) => (
-          <Stack direction={'row'} p={5} key={index}>
-            <SkeletonCircle size={'16'} mr={3} flexShrink={0} />
-            <SkeletonText width={'full'} />
-          </Stack>
-        ))}
-      </Box>
-    );
-  }
-
-  if (!isLoading && posts.length === 0) {
-    return (
-      <Box p={10} textAlign={'center'}>
-        <Heading size={'md'} mb={1}>
-          Woah! Such Empty.
-        </Heading>
-        <Text fontWeight={'medium'} color={baseTheme.textSecondaryColor}>
-          No posts found! Tweet something or follow a user to view the posts.
-        </Text>
-      </Box>
-    );
-  }
-
-  return (
-    <AnimatePresence>
-      {posts.map((post) => (
-        <Post key={post.id} post={post} />
-      ))}
-    </AnimatePresence>
-  );
-};
-
-const renderCenter = () => {
-  return (
-    <Box>
-      <HomeHeader />
-      <HomePostsList />
-    </Box>
-  );
-};
-
-const HomePage = () => {
-  return (
-    <MainLayout
-      left={<SideNav />}
-      center={renderCenter()}
-      right={<SideBar />}
-    />
   );
 };
 
