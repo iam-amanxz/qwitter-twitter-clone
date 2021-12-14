@@ -1,21 +1,24 @@
+import { async } from '@firebase/util';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
   addDoc,
+  arrayRemove,
+  arrayUnion,
   collection,
+  deleteDoc,
   doc,
-  getDoc,
   getDocs,
+  orderBy,
   query,
-  setDoc,
-  where,
+  updateDoc,
 } from 'firebase/firestore';
 import { getDownloadURL, uploadBytesResumable } from 'firebase/storage';
-import { db, auth } from '../firebase';
+import { db } from '../firebase';
 
 const initialState = {
   posts: [],
   error: null,
-  isLoading: true,
+  isLoading: false,
 };
 
 export const uploadPostImage = async (
@@ -43,11 +46,25 @@ export const uploadPostImage = async (
   );
 };
 
-export const listenToPosts = createAsyncThunk(
-  'listenToPosts',
+export const fetchPosts = createAsyncThunk(
+  'fetchPosts',
   async (req, thunkAPI) => {
-    console.log('listening to posts...');
-    return req;
+    console.log('FETCHING POSTS...');
+    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+
+    try {
+      const querySnapshot = await getDocs(q);
+      const posts = [];
+      querySnapshot.forEach((doc) => {
+        posts.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+      return posts;
+    } catch (error) {
+      return thunkAPI.rejectWithValue({ error: error.message });
+    }
   },
 );
 
@@ -74,6 +91,53 @@ export const createPost = createAsyncThunk(
   },
 );
 
+export const likePost = createAsyncThunk(
+  'likePost',
+  async ({ postId, username }, thunkAPI) => {
+    console.log('LIKING POST...');
+    try {
+      const postRef = doc(db, 'posts', postId);
+      await updateDoc(postRef, {
+        likes: arrayUnion(username),
+      });
+      return { postId, username };
+    } catch (error) {
+      console.error(error);
+      return thunkAPI.rejectWithValue({ error: error.message });
+    }
+  },
+);
+
+export const unlikePost = createAsyncThunk(
+  'unlikePost',
+  async ({ postId, username }, thunkAPI) => {
+    console.log('UNLIKING POST...');
+    try {
+      const postRef = doc(db, 'posts', postId);
+      await updateDoc(postRef, {
+        likes: arrayRemove(username),
+      });
+      return { postId, username };
+    } catch (error) {
+      console.error(error);
+      return thunkAPI.rejectWithValue({ error: error.message });
+    }
+  },
+);
+
+export const deletePost = createAsyncThunk(
+  'deletePost',
+  async (postId, thunkAPI) => {
+    try {
+      await deleteDoc(doc(db, 'posts', postId));
+      return postId;
+    } catch (error) {
+      console.error(error);
+      return thunkAPI.rejectWithValue({ error: error.message });
+    }
+  },
+);
+
 export const postSlice = createSlice({
   name: 'posts',
   initialState,
@@ -81,29 +145,97 @@ export const postSlice = createSlice({
     resetPostState: () => initialState,
   },
   extraReducers: (builder) => {
-    builder.addCase(listenToPosts.pending, (state, action) => {
-      state.isLoading = true;
-    });
-    builder.addCase(listenToPosts.fulfilled, (state, action) => {
-      state.posts = action.payload;
-      state.isLoading = false;
-    });
-    builder.addCase(listenToPosts.rejected, (state, action) => {
-      state.error = action.error;
-      state.isLoading = false;
-    });
     builder.addCase(createPost.pending, (state, action) => {
-      state.isLoading = true;
+      // state.isLoading = true;
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
-      state.isLoading = false;
+      state.posts.unshift(action.payload);
+      // state.isLoading = false;
     });
     builder.addCase(createPost.rejected, (state, action) => {
       state.error = action.error;
+      // state.isLoading = false;
+    });
+
+    // ------------------------------------------------ //
+
+    builder.addCase(likePost.pending, (state, action) => {
+      // state.isLoading = true;
+    });
+    builder.addCase(likePost.fulfilled, (state, action) => {
+      const post = state.posts.find((p) => p.id === action.payload.postId);
+      post.likes.push(action.payload.username);
+      // state.isLoading = false;
+    });
+    builder.addCase(likePost.rejected, (state, action) => {
+      state.error = action.error;
+      // state.isLoading = false;
+    });
+
+    // ------------------------------------------------ //
+
+    builder.addCase(unlikePost.pending, (state, action) => {
+      // state.isLoading = true;
+    });
+    builder.addCase(unlikePost.fulfilled, (state, action) => {
+      const post = state.posts.find((p) => p.id === action.payload.postId);
+      post.likes = post.likes.filter((l) => l !== action.payload.username);
+      // state.isLoading = false;
+    });
+    builder.addCase(unlikePost.rejected, (state, action) => {
+      state.error = action.error;
+      // state.isLoading = false;
+    });
+
+    // ------------------------------------------------ //
+
+    builder.addCase(fetchPosts.pending, (state, action) => {
+      state.isLoading = true;
+    });
+    builder.addCase(fetchPosts.fulfilled, (state, action) => {
+      state.posts = action.payload;
       state.isLoading = false;
+    });
+    builder.addCase(fetchPosts.rejected, (state, action) => {
+      state.error = action.error;
+      state.isLoading = false;
+    });
+
+    // ------------------------------------------------ //
+
+    builder.addCase(deletePost.pending, (state, action) => {
+      // state.isLoading = true;
+    });
+    builder.addCase(deletePost.fulfilled, (state, action) => {
+      state.posts = state.posts.filter((p) => p.id !== action.payload);
+      // state.isLoading = false;
+    });
+    builder.addCase(deletePost.rejected, (state, action) => {
+      state.error = action.error;
+      // state.isLoading = false;
     });
   },
 });
 
 export const { resetPostState } = postSlice.actions;
 export default postSlice.reducer;
+
+// builder.addCase(listenToPosts.pending, (state, action) => {
+//   state.isLoading = true;
+// });
+// builder.addCase(listenToPosts.fulfilled, (state, action) => {
+//   state.posts = action.payload;
+//   state.isLoading = false;
+// });
+// builder.addCase(listenToPosts.rejected, (state, action) => {
+//   state.error = action.error;
+//   state.isLoading = false;
+// });
+
+// export const listenToPosts = createAsyncThunk(
+//   'listenToPosts',
+//   async (req, thunkAPI) => {
+//     console.log('listening to posts...');
+//     return req;
+//   },
+// );

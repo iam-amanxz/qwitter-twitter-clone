@@ -51,6 +51,8 @@ const UserHeader = () => {
   const { baseTheme } = useTheme();
   const [isLg] = useMediaQuery('(min-width: 992px)');
   const { currentUser, isLoading } = useSelector((state) => state.auth);
+  const { users } = useSelector((state) => state.users);
+  const user = users.find((user) => user.id === currentUser.id);
 
   return (
     <Link to="">
@@ -59,8 +61,8 @@ const UserHeader = () => {
           <SkeletonCircle size={'50px'} mr={isLg && 3} />
         ) : (
           <Avatar
-            src={currentUser?.profilePicUrl && currentUser.profilePicUrl}
-            name={currentUser?.name}
+            src={user?.profilePicUrl && user.profilePicUrl}
+            name={user?.name}
             size="md"
             mr={isLg && 3}
           />
@@ -69,11 +71,11 @@ const UserHeader = () => {
         {isLg && !isLoading ? (
           <Box>
             <Heading size="sm" color={baseTheme.textPrimaryColor}>
-              {currentUser?.name}
+              {user?.name}
             </Heading>
 
             <Text fontSize="sm" color={baseTheme.textSecondaryColor}>
-              @{currentUser?.username}
+              @{user?.username}
             </Text>
           </Box>
         ) : (

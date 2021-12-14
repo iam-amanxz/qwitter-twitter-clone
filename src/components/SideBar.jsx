@@ -6,14 +6,42 @@ import {
   Heading,
   SkeletonText,
   Text,
+  useToast,
 } from '@chakra-ui/react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/themeContext';
+import { followUser } from '../store/userSlice';
+import { showToast } from '../utils';
 
 const UserDetail = ({ user }) => {
+  const { currentUser } = useSelector((state) => state.auth);
   const { baseTheme } = useTheme();
+  const toast = useToast();
+
+  const dispatch = useDispatch();
+
+  const handleFollow = async () => {
+    const res = await dispatch(
+      followUser({
+        userId: currentUser?.id,
+        username: currentUser?.username,
+        targetId: user?.id,
+        targetName: user?.username,
+      }),
+    );
+    console.log(res);
+
+    // if (res.error) {
+    //   showToast(toast, {
+    //     status: 'error',
+    //     description: res.error,
+    //   });
+    //   return;
+    // }
+  };
 
   return (
     <Flex
@@ -44,6 +72,7 @@ const UserDetail = ({ user }) => {
       </Box>
 
       <Button
+        onClick={handleFollow}
         backgroundColor={baseTheme.contrastBtnBgColor}
         color={baseTheme.contrastBtnTextColor}
         _hover={{ backgroundColor: baseTheme.contrastBtnBgHoverColor }}
@@ -57,7 +86,21 @@ const UserDetail = ({ user }) => {
 
 const SideBar = () => {
   const { baseTheme } = useTheme();
+  const { currentUser } = useSelector((state) => state.auth);
   const { users, isLoading } = useSelector((state) => state.users);
+  const [usersToFollow, setUsersToFollow] = useState([]);
+
+  useEffect(() => {
+    if (users) {
+      setUsersToFollow(
+        users.filter(
+          (user) =>
+            !user.followers?.includes(currentUser?.username) &&
+            user?.username !== currentUser?.username,
+        ),
+      );
+    }
+  }, [users, currentUser]);
 
   return (
     <Box
@@ -74,8 +117,13 @@ const SideBar = () => {
 
       {/* user cards */}
       {isLoading && <SkeletonText w={'full'} />}
-      {users.length > 0 &&
-        users.map((user) => <UserDetail user={user} key={user.username} />)}
+
+      {!isLoading && usersToFollow.length === 0 && <Text>Empty</Text>}
+
+      {usersToFollow.length > 0 &&
+        usersToFollow
+          .slice(0, 5)
+          .map((user) => <UserDetail user={user} key={user.username} />)}
     </Box>
   );
 };

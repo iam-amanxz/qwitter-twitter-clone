@@ -11,10 +11,9 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AuthPage from './routes/AuthPage';
 import HomePage from './routes/HomePage';
 import PrivateRoute from './routes/PrivateRoute';
-import { listenToUsers } from './store/userSlice';
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { fetchUsers, resetUserState } from './store/userSlice';
 import { useSelector } from 'react-redux';
-import { listenToPosts } from './store/postSlice';
+import { fetchPosts, resetPostState } from './store/postSlice';
 
 function App() {
   const dispatch = useDispatch();
@@ -33,6 +32,8 @@ function App() {
         // if user is logged out reset the auth state
         localStorage.removeItem('authenticated');
         dispatch(resetAuthState());
+        dispatch(resetUserState());
+        dispatch(resetPostState());
       }
     });
 
@@ -40,39 +41,14 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
-
     if (isAuthenticated) {
-      let unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const users = [];
-        querySnapshot.forEach((doc) => {
-          users.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-        dispatch(listenToUsers(users));
-      });
-
-      return () => unsubscribe();
+      dispatch(fetchUsers());
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
-    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-
     if (isAuthenticated) {
-      let unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const posts = [];
-        querySnapshot.forEach((doc) => {
-          posts.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-        dispatch(listenToPosts(posts));
-      });
-      return () => unsubscribe();
+      dispatch(fetchPosts());
     }
   }, [isAuthenticated]);
 
@@ -94,3 +70,33 @@ function App() {
 }
 
 export default App;
+
+{
+  // const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+  // let unsubscribe = onSnapshot(q, (querySnapshot) => {
+  //   const posts = [];
+  //   querySnapshot.forEach((doc) => {
+  //     posts.push({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     });
+  //   });
+  //   dispatch(listenToPosts(posts));
+  // });
+  // return () => unsubscribe();
+}
+
+{
+  // const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+  //   let unsubscribe = onSnapshot(q, (querySnapshot) => {
+  //     const users = [];
+  //     querySnapshot.forEach((doc) => {
+  //       users.push({
+  //         id: doc.id,
+  //         ...doc.data(),
+  //       });
+  //     });
+  //     dispatch(listenToUsers(users));
+  //   });
+  //   return () => unsubscribe();
+}

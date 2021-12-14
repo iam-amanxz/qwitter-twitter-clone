@@ -41,9 +41,9 @@ const HomePostsList = () => {
   if (isLoading) {
     return (
       <Box>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((el, index) => (
+        {[1, 2, 3].map((el, index) => (
           <Stack direction={'row'} p={5} key={index}>
-            <SkeletonCircle size={'20'} mr={3} flexShrink={0} />
+            <SkeletonCircle size={'16'} mr={3} flexShrink={0} />
             <SkeletonText width={'full'} />
           </Stack>
         ))}
@@ -51,7 +51,7 @@ const HomePostsList = () => {
     );
   }
 
-  if (posts.length === 0) {
+  if (!isLoading && posts.length === 0) {
     return (
       <Box p={10} textAlign={'center'}>
         <Heading size={'md'} mb={1}>

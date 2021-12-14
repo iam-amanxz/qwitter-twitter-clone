@@ -46,8 +46,6 @@ const TweetModal = ({ isTweetModalOpen, setIsTweetModalOpen }) => {
   const maxImageSize = 2 * 1024 * 1024; // 2mb
   const [loading, setLoading] = useState(false);
 
-  console.log('imageUrl', imageUrl);
-
   const handleClose = () => {
     setImageSelected(false);
     setImageUrl('');
