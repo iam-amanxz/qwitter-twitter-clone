@@ -150,7 +150,7 @@ const SideNav = () => {
           iconSpacing={0}
           onClick={() => setIsTweetModalOpen(true)}
         >
-          {isLg && 'Tweet'}
+          {isLg && 'Qweet'}
         </Button>
       </Stack>
 
