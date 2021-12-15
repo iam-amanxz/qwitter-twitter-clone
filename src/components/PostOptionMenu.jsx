@@ -60,7 +60,7 @@ const PostOptionMenu = ({ post }) => {
           _hover={{ bg: baseTheme.backgroundHoverColor }}
           _focus={{ bg: baseTheme.backgroundHoverColor }}
         >
-          Delete Post
+          Delete Qweet
         </MenuItem>
       </MenuList>
     </Menu>

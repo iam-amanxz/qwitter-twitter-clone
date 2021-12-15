@@ -73,7 +73,7 @@ const HomePostsList = () => {
           Woah! Such Empty.
         </Heading>
         <Text fontWeight={'medium'} color={baseTheme.textSecondaryColor}>
-          No posts found! Tweet something or follow a user to view the posts.
+          No posts found! Qweet something or follow a user to view the posts.
         </Text>
       </Box>
     );

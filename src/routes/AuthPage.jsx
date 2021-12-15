@@ -10,7 +10,7 @@ const AuthPage = () => {
   // const coverImage =
   //   'https://images.unsplash.com/photo-1634334181759-a965220b6a91?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1099&q=80';
   const coverImage =
-    'https://images.unsplash.com/photo-1492573637402-25691cd9eac2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80';
+    'https://images.unsplash.com/photo-1547989453-11e67ffb3885?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1632&q=80';
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSignUpActive, setIsSignUpActive] = useState(true);
 

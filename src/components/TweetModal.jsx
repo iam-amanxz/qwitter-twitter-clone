@@ -141,7 +141,7 @@ const TweetModal = ({ isTweetModalOpen, setIsTweetModalOpen }) => {
 
     console.log('success creating post');
     showToast(toast, {
-      description: 'Your tweet was sent!',
+      description: 'Your qweet was sent!',
     });
     setLoading(false);
     handleClose();
@@ -258,7 +258,7 @@ const TweetModal = ({ isTweetModalOpen, setIsTweetModalOpen }) => {
                 borderRadius={'full'}
                 onClick={handleCreateTweet}
               >
-                Tweet
+                Qweet
               </Button>
             </Box>
           </Flex>

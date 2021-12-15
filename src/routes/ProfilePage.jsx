@@ -281,7 +281,7 @@ const ProfileTabs = ({ userPosts, likedPosts }) => {
             boxShadow: 'none',
           }}
         >
-          Tweets
+          Qweets
         </Tab>
 
         <Tab
@@ -336,7 +336,7 @@ const ProfileHeader = ({ user, postsCount }) => {
           {user?.name}
         </Heading>
         <Text color={baseTheme.textSecondaryColor} fontSize={'xs'}>
-          {postsCount} Tweets
+          {postsCount} Qweets
         </Text>
       </Box>
     </Flex>

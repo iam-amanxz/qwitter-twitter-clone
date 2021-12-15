@@ -53,7 +53,7 @@ const DeletePostConfirmModal = ({
             fontWeight="bold"
             color={baseTheme.textPrimaryColor}
           >
-            Delete Post
+            Delete Qweet
           </AlertDialogHeader>
 
           <AlertDialogBody color={baseTheme.textSecondaryColor}>
