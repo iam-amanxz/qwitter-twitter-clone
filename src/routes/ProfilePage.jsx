@@ -29,6 +29,7 @@ import { followUser, unfollowUser, userSelector } from '../store/userSlice';
 import { AnimatePresence } from 'framer-motion';
 import Post from '../components/Post';
 import { showToast } from '../utils';
+import EditProfileModal from '../components/EditProfileModal';
 
 const ProfilePage = () => {
   return (
@@ -128,7 +129,6 @@ const ProfileBanner = ({ user }) => {
       <Box>
         <Image
           src={user?.coverPicUrl || placeholderCoverPic}
-          alt={user?.name}
           h={{ base: 32, md: 40 }}
           w={'full'}
           objectFit={'cover'}
@@ -256,6 +256,12 @@ const ProfileBanner = ({ user }) => {
               : 'Follow'}
           </Button>
         )}
+
+        <EditProfileModal
+          user={user}
+          isEditProfileModalOpen={isEditProfileModalOpen}
+          setIsEditProfileModalOpen={setIsEditProfileModalOpen}
+        />
       </Box>
     </>
   );

@@ -11,8 +11,10 @@ import {
   getDocs,
   query,
   setDoc,
+  updateDoc,
   where,
 } from 'firebase/firestore';
+import { getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 import { db, auth } from '../firebase';
 
 const initialState = {
@@ -114,6 +116,45 @@ export const logout = createAsyncThunk('logout', async (req, thunkAPI) => {
   }
 });
 
+export const updateProfile = createAsyncThunk(
+  'updateProfile',
+  async (updates, thunkAPI) => {
+    const userId = auth.currentUser.uid;
+
+    try {
+      const userRef = doc(db, 'users', userId);
+      const res = await updateDoc(userRef, updates);
+      return res;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  },
+);
+
+export const uploadImage = (
+  storageRef,
+  file,
+  onUpload,
+  onError,
+  onComplete,
+) => {
+  const uploadTask = uploadBytesResumable(storageRef, file);
+  uploadTask.on(
+    'state_changed',
+    (snapshot) => {
+      onUpload((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+    },
+    (error) => {
+      onError(error);
+    },
+    () => {
+      getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+        onComplete(downloadURL);
+      });
+    },
+  );
+};
+
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -171,6 +212,18 @@ export const authSlice = createSlice({
       // current user will be set from onAuthStateChanged
     });
     builder.addCase(logout.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    });
+    builder.addCase(updateProfile.pending, (state, action) => {
+      state.isLoading = true;
+    });
+    builder.addCase(updateProfile.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.error = null;
+      // current user will be set from onAuthStateChanged
+    });
+    builder.addCase(updateProfile.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.payload;
     });
