@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 export const themes = {
   baseThemes: {
@@ -47,31 +47,37 @@ export const themes = {
   },
   accentThemes: {
     colombo: {
+      name: 'colombo',
       textColor: '#fff',
       accentColor: '#22c55e',
       accentHoverColor: '#16a34a',
     },
     tokyo: {
+      name: 'tokyo',
       textColor: '#fff',
       accentColor: '#ef4444',
       accentHoverColor: '#dc2626',
     },
     doha: {
+      name: 'doha',
       textColor: '#fff',
       accentColor: '#3b82f6',
       accentHoverColor: '#2563eb',
     },
     osaka: {
+      name: 'osaka',
       textColor: '#fff',
       accentColor: '#d946ef',
       accentHoverColor: '#c026d3',
     },
     beijing: {
+      name: 'beijing',
       textColor: '#fff',
       accentColor: '#f59e0b',
       accentHoverColor: '#d97706',
     },
     denver: {
+      name: 'denver',
       textColor: '#fff',
       accentColor: '#9333ea',
       accentHoverColor: '#7e22ce',
@@ -84,6 +90,48 @@ const ThemeContext = createContext();
 const ThemeProvider = ({ children }) => {
   const [baseTheme, setBaseTheme] = useState(themes.baseThemes.light);
   const [accentTheme, setAccentTheme] = useState(themes.accentThemes.colombo);
+
+  useEffect(() => {
+    const base = localStorage.getItem('baseTheme');
+    const accent = localStorage.getItem('accentTheme');
+    if (base) {
+      switch (base) {
+        case 'Light':
+          setBaseTheme(themes.baseThemes.light);
+          break;
+        case 'Dim':
+          setBaseTheme(themes.baseThemes.dim);
+          break;
+        case 'Lights out':
+          setBaseTheme(themes.baseThemes.dark);
+          break;
+      }
+    }
+
+    if (accent) {
+      switch (accent) {
+        case 'colombo':
+          setAccentTheme(themes.accentThemes.colombo);
+          break;
+        case 'tokyo':
+          setAccentTheme(themes.accentThemes.tokyo);
+          break;
+        case 'doha':
+          setAccentTheme(themes.accentThemes.doha);
+          break;
+        case 'osaka':
+          setAccentTheme(themes.accentThemes.osaka);
+          break;
+        case 'beijing':
+          setAccentTheme(themes.accentThemes.beijing);
+          break;
+        case 'denver':
+          setAccentTheme(themes.accentThemes.denver);
+          break;
+      }
+    }
+  }, []);
+
   const value = {
     themes,
     baseTheme,

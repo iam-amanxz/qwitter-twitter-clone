@@ -28,8 +28,8 @@ const ThemeModal = ({ isThemeModalOpen, setIsThemeModalOpen }) => {
   };
 
   const handleSaveTheme = () => {
-    // localStorage.setItem('baseTheme', JSON.stringify(baseTheme));
-    // localStorage.setItem('accentTheme', JSON.stringify(accentTheme));
+    localStorage.setItem('baseTheme', baseTheme.name);
+    localStorage.setItem('accentTheme', accentTheme.name);
     onClose();
     setIsThemeModalOpen(false);
   };
