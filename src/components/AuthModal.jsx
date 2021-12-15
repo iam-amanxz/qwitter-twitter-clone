@@ -79,13 +79,11 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
   };
 
   const handleFormSubmit = async (values, actions) => {
-    console.log('Form data', values);
-
     if (!isSignUpActive) {
       console.log('login');
 
       const res = await dispatch(
-        login({ email: values.email, password: values.password }),
+        login({ email: values.email.trim(), password: values.password }),
       );
       if (res.error) {
         showToast(toast, {
@@ -105,9 +103,9 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
 
       const res = await dispatch(
         register({
-          name,
-          username,
-          email,
+          name: name.trim(),
+          username: username.trim(),
+          email: email.trim(),
           password,
           bio: null,
           profilePicUrl: null,
