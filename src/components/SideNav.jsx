@@ -22,6 +22,7 @@ import {
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/themeContext';
+import { userSelector } from '../store/userSlice';
 import LogoutModal from './LogoutModal';
 import ThemeModal from './ThemeModal';
 import TweetModal from './TweetModal';
@@ -51,15 +52,8 @@ const UserHeader = () => {
   console.log('USER HEADER RENDERED - SIDE NAV');
   const { baseTheme } = useTheme();
   const [isLg] = useMediaQuery('(min-width: 992px)');
-  const { currentUser, isLoading } = useSelector((state) => state.auth);
-  const { users } = useSelector((state) => state.users);
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    if (currentUser && users) {
-      setUser(users.find((user) => user.id === currentUser.id));
-    }
-  }, [currentUser, users]);
+  const { isLoading } = useSelector((state) => state.auth);
+  const user = useSelector(userSelector);
 
   return (
     <Link to="">
@@ -133,7 +127,7 @@ const SideNav = () => {
   return (
     <Box pt={4} position={'sticky'} top={0}>
       <UserHeader />
-      {/* Links */}
+
       <Stack direction="column" spacing={5}>
         {links.map(({ icon, title, onClick }, index) => (
           <NavButton icon={icon} title={title} onClick={onClick} key={index} />

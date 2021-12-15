@@ -28,7 +28,7 @@ const renderCenter = () => {
     if (users.length > 0) {
       setUser(users.find((user) => user.username === username));
     }
-  }, [users]);
+  }, [users, username]);
 
   return (
     <Box>

@@ -24,12 +24,13 @@ import {
   modifyPost,
 } from './store/postSlice';
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
-import ExplorePage from './routes/Explore';
+import ExplorePage from './routes/ExplorePage';
+import ProfilePage from './routes/ProfilePage';
 
 function App() {
   const dispatch = useDispatch();
 
-  // this will every time the auth state changes
+  // Auth listener
   useEffect(() => {
     const sub = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -50,6 +51,7 @@ function App() {
     return () => sub();
   }, []);
 
+  // Users listener
   useEffect(() => {
     const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
     let unsubscribe = onSnapshot(q, (snapshot) => {
@@ -76,6 +78,7 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  // Posts listener
   useEffect(() => {
     const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
     let unsubscribe = onSnapshot(q, (snapshot) => {
@@ -119,6 +122,14 @@ function App() {
           element={
             <PrivateRoute>
               <ExplorePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/:username"
+          element={
+            <PrivateRoute>
+              <ProfilePage />
             </PrivateRoute>
           }
         />
