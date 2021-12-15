@@ -66,7 +66,6 @@ const EditProfileModal = ({
       });
     }
   }, [user]);
-
   const handleClose = () => {
     setFormValues({
       name: user?.name,
@@ -122,41 +121,33 @@ const EditProfileModal = ({
         break;
     }
   };
-  const uploadImage = (storageRef, file) =>
-    new Promise((resolve, reject) => {
-      console.log('upload starts');
+  const uploadPicture = (path, file, onProgress) => {
+    return new Promise((resolve, reject) => {
+      const storageRef = ref(storage, `${path}/${uuid()}`);
       const task = uploadBytesResumable(storageRef, file);
 
       task.on(
         'state_changed',
         (snapshot) => {
-          setUploadProgress(
+          onProgress(
             Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
           );
         },
         (error) => {
-          console.log('error', error);
-          setUploadProgress(0);
           task.cancel();
-          onError(error.message);
           reject(error);
         },
         () => {
           console.log('completed upload, getting download url');
           getDownloadURL(task.snapshot.ref).then((downloadURL) => {
-            setUploadProgress(0);
             resolve(downloadURL);
           });
         },
       );
     });
+  };
   const handleUpdateProfile = async () => {
     setLoading(true);
-
-    console.log(coverPicSelected);
-    console.log(profilePicSelected);
-    console.log(formValues);
-
     const updates = formValues;
 
     if (updates.name.trim() === '') {
@@ -164,38 +155,37 @@ const EditProfileModal = ({
     }
 
     if (coverPicSelected) {
-      const coverPicsStorageRef = ref(storage, `coverPics/${uuid()}`);
-      const url = await uploadImage(
-        coverPicsStorageRef,
-        coverPicInputRef.current.files[0],
-      );
-
-      updates.coverPicUrl = url;
+      try {
+        const url = await uploadPicture(
+          'coverPics',
+          coverPicInputRef.current.files[0],
+          setUploadProgress,
+        );
+        updates.coverPicUrl = url;
+      } catch (e) {
+        return onError('Error uploading cover picture');
+      }
     }
 
     if (profilePicSelected) {
-      const profilePicsStorageRef = ref(storage, `coverPics/${uuid()}`);
-      const url = await uploadImage(
-        profilePicsStorageRef,
-        profilePicInputRef.current.files[0],
-      );
-
-      updates.profilePicUrl = url;
+      try {
+        const url = await uploadPicture(
+          'profilePics',
+          profilePicInputRef.current.files[0],
+          setUploadProgress,
+        );
+        updates.profilePicUrl = url;
+      } catch (e) {
+        return onError('Error uploading profile picture');
+      }
     }
 
-    console.log('final function running.............');
-    console.log(updates);
-
-    // Finally
-
     const res = await dispatch(updateProfile(updates));
-
     if (res.error) {
-      onError('Error updating profile');
+      return onError('Error updating profile');
     }
 
     setLoading(false);
-
     handleClose();
   };
 
