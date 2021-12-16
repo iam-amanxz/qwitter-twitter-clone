@@ -3,18 +3,34 @@ import SideNav from '../components/SideNav';
 import SideBar from '../components/SideBar';
 import {
   Box,
+  Button,
+  Circle,
+  CircularProgress,
+  Flex,
+  FormControl,
   Heading,
+  Image,
+  Input,
+  Progress,
   SkeletonCircle,
   SkeletonText,
   Stack,
   Text,
+  Textarea,
+  useToast,
 } from '@chakra-ui/react';
 import { useTheme } from '../context/themeContext';
 import { useSelector } from 'react-redux';
 import Post from '../components/Post';
 import { AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { userSelector } from '../store/userSlice';
+import { showToast } from '../utils';
+import { createPost, uploadPostImage } from '../store/postSlice';
+import { FiImage, FiX } from 'react-icons/fi';
+import { useDispatch } from 'react-redux';
+import { ref } from 'firebase/storage';
+import { storage } from '../firebase';
 
 const renderCenter = () => (
   <Box>
@@ -68,12 +84,12 @@ const HomePostsList = () => {
 
   if (!isLoading && followingPosts.length === 0) {
     return (
-      <Box p={10} textAlign={'center'}>
+      <Box p={4}>
         <Heading size={'md'} mb={1}>
           Woah! Such Empty.
         </Heading>
         <Text fontWeight={'medium'} color={baseTheme.textSecondaryColor}>
-          No posts found! Qweet something or follow a user to view the posts.
+          No posts found! Qweet something or follow a user to view posts.
         </Text>
       </Box>
     );

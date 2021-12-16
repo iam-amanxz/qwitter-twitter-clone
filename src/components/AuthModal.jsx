@@ -48,6 +48,7 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
       return yup.object({
         email: yup
           .string()
+          .trim()
           .required('Email is required')
           .email('Invalid email'),
         password: yup
@@ -60,6 +61,7 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
         name: yup.string().required('Name is required'),
         username: yup
           .string()
+          .trim()
           .required('Username is required')
           .min(3, 'Username must be at least 3 characters')
           .matches(
@@ -68,6 +70,7 @@ const AuthModal = ({ isAuthModalOpen, setIsAuthModalOpen, isSignUpActive }) => {
           ),
         email: yup
           .string()
+          .trim()
           .required('Email is required')
           .email('Invalid email'),
         password: yup

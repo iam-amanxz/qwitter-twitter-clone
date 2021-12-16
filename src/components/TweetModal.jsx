@@ -85,7 +85,7 @@ const TweetModal = ({ isTweetModalOpen, setIsTweetModalOpen }) => {
 
   const uploadImage = () => {
     return new Promise((resolve, reject) => {
-      const postsPicsStorageRef = ref(storage, `coverPics/${uuid()}`);
+      const postsPicsStorageRef = ref(storage, `postPics/${uuid()}`);
 
       uploadPostImage(
         postsPicsStorageRef,
@@ -166,7 +166,7 @@ const TweetModal = ({ isTweetModalOpen, setIsTweetModalOpen }) => {
       >
         <Progress
           value={uploadProgress}
-          size={'sm'}
+          size={'xs'}
           display={uploadProgress > 0 ? 'block' : 'none'}
         />
         <ModalHeader>

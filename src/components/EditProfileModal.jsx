@@ -313,8 +313,11 @@ const EditProfileModal = ({
                 accept="image/jpeg,image/png,image/jpg"
               />
             </>
-            <FormLabel mb={0}>Name</FormLabel>
+            <FormLabel color={baseTheme.textPrimaryColor} mb={0}>
+              Name
+            </FormLabel>
             <Input
+              color={baseTheme.textPrimaryColor}
               value={formValues.name}
               placeholder="Name"
               type={'text'}
@@ -324,9 +327,13 @@ const EditProfileModal = ({
             />
           </FormControl>
 
-          <FormControl borderColor={baseTheme.borderColor}>
+          <FormControl
+            color={baseTheme.textPrimaryColor}
+            borderColor={baseTheme.borderColor}
+          >
             <FormLabel mb={0}>Bio</FormLabel>
             <Textarea
+              color={baseTheme.textPrimaryColor}
               value={formValues.bio}
               placeholder="Bio"
               maxLength={160}
@@ -340,6 +347,7 @@ const EditProfileModal = ({
         <ModalFooter>
           <Button
             borderWidth={'1px'}
+            color={baseTheme.textPrimaryColor}
             borderColor={baseTheme.borderColorAlt}
             backgroundColor={baseTheme.backgroundColor}
             mr={3}

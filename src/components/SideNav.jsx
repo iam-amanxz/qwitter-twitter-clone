@@ -56,7 +56,7 @@ const UserHeader = () => {
   const user = useSelector(userSelector);
 
   return (
-    <Link to="">
+    <Link to={`/${user?.username}`}>
       <Flex mb={5} alignItems={'center'}>
         {isLoading ? (
           <SkeletonCircle size={'50px'} mr={isLg && 3} />
