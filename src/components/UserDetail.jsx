@@ -90,41 +90,41 @@ const UserDetail = memo(
         </Box>
 
         <Box flexGrow={1}>
-          <Link to={`/${user.username}`}>
-            <Flex justifyContent={'space-between'} w={'full'}>
-              <Box>
+          <Flex justifyContent={'space-between'} w={'full'}>
+            <Box>
+              <Link to={`/${user.username}`}>
                 <Heading size="xs" color={baseTheme.textPrimaryColor} mr={1}>
                   {user.name}
                 </Heading>
                 <Text fontSize="xs" color={baseTheme.textSecondaryColor}>
                   @{user.username}
                 </Text>
-              </Box>
+              </Link>
+            </Box>
 
-              {user.username !== currentUser?.username && (
-                <Button
-                  flexShrink={0}
-                  onClick={handleFollowUnfollow}
-                  backgroundColor={baseTheme.contrastBtnBgColor}
-                  color={baseTheme.contrastBtnTextColor}
-                  _hover={{
-                    backgroundColor: baseTheme.contrastBtnBgHoverColor,
-                  }}
-                  size="xs"
-                >
-                  {user.followers.includes(currentUser?.username)
-                    ? 'Unfollow'
-                    : 'Follow'}
-                </Button>
-              )}
-            </Flex>
-
-            {user.bio && (
-              <Text fontSize={'sm'} color={baseTheme.textPrimaryColor}>
-                {user.bio}
-              </Text>
+            {user.username !== currentUser?.username && (
+              <Button
+                flexShrink={0}
+                onClick={handleFollowUnfollow}
+                backgroundColor={baseTheme.contrastBtnBgColor}
+                color={baseTheme.contrastBtnTextColor}
+                _hover={{
+                  backgroundColor: baseTheme.contrastBtnBgHoverColor,
+                }}
+                size="xs"
+              >
+                {user.followers.includes(currentUser?.username)
+                  ? 'Unfollow'
+                  : 'Follow'}
+              </Button>
             )}
-          </Link>
+          </Flex>
+
+          {user.bio && (
+            <Text fontSize={'sm'} color={baseTheme.textPrimaryColor}>
+              {user.bio}
+            </Text>
+          )}
         </Box>
       </Flex>
     );

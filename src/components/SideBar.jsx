@@ -22,7 +22,7 @@ const SideBar = () => {
   const { baseTheme } = useTheme();
   const { currentUser } = useSelector((state) => state.auth);
   const { users, isLoading } = useSelector((state) => state.users);
-  const [usersToFollow, setUsersToFollow] = useState([]);
+  const [usersToFollow, setUsersToFollow] = useState(null);
 
   useEffect(() => {
     if (currentUser && users.length > 0) {
@@ -54,7 +54,7 @@ const SideBar = () => {
       {/* user cards */}
       {isLoading && <SkeletonText w={'full'} />}
 
-      {!isLoading && usersToFollow.length === 0 && (
+      {!isLoading && usersToFollow && usersToFollow.length === 0 && (
         <Text
           mt={4}
           fontSize={'sm'}
@@ -66,13 +66,14 @@ const SideBar = () => {
       )}
 
       <AnimatePresence>
-        {usersToFollow.length > 0 &&
+        {usersToFollow &&
+          usersToFollow.length > 0 &&
           usersToFollow
             .slice(0, 5)
             .map((user) => <UserDetail user={user} key={user.username} />)}
       </AnimatePresence>
 
-      {usersToFollow.length > 5 && (
+      {usersToFollow && usersToFollow.length > 5 && (
         <Link to={`/${currentUser.username}/explore/to_follow`}>
           <Text mt={4} fontSize={'sm'} color={'blue.500'} fontWeight={'medium'}>
             Show more

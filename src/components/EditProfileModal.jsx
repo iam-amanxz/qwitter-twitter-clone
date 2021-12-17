@@ -282,7 +282,6 @@ const EditProfileModal = ({
               backgroundColor={'blackAlpha.600'}
             >
               <FiImage
-                onClick={() => {}}
                 color="white"
                 fontSize={'1.3em'}
                 onClick={() => {
