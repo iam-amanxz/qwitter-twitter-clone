@@ -5,14 +5,16 @@ import AuthModal from '../components/AuthModal';
 import { useTheme } from '../context/themeContext';
 
 const AuthPage = () => {
-  const { baseTheme, accentTheme } = useTheme();
+  const { themes, baseTheme, accentTheme } = useTheme();
 
-  // const coverImage =
-  //   'https://images.unsplash.com/photo-1634334181759-a965220b6a91?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1099&q=80';
-  const coverImage =
-    'https://images.unsplash.com/photo-1547989453-11e67ffb3885?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1632&q=80';
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSignUpActive, setIsSignUpActive] = useState(true);
+  const coverImage =
+    baseTheme === themes.baseThemes.light
+      ? 'https://images.unsplash.com/photo-1634334181759-a965220b6a91?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1999&q=80'
+      : baseTheme === themes.baseThemes.dim
+      ? 'https://images.unsplash.com/photo-1544077960-604201fe74bc?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1171&q=80'
+      : 'https://images.unsplash.com/photo-1439792675105-701e6a4ab6f0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1173&q=80';
 
   return (
     <Flex h={'100vh'}>

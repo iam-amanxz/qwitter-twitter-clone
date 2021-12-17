@@ -133,6 +133,9 @@ const EditProfileModal = ({
 
     console.log('submitted');
     handleClose();
+    showToast(toast, {
+      description: 'Profile updated!',
+    });
   };
   const handleClose = () => {
     onClose();
