@@ -5,6 +5,7 @@ import {
   Circle,
   Flex,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   Image,
   Input,
@@ -21,106 +22,59 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import { useEffect, useRef, useState } from 'react';
-import { FiImage, FiX } from 'react-icons/fi';
-import { useDispatch } from 'react-redux';
+import { FiImage } from 'react-icons/fi';
 import { useTheme } from '../context/themeContext';
-import { storage } from '../firebase';
-import { updateProfile } from '../store/authSlice';
+import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useEffect, useRef, useState } from 'react';
 import { showToast } from '../utils';
+import { storage } from '../firebase';
 import { v4 as uuid } from 'uuid';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { useDispatch } from 'react-redux';
+import { updateProfile } from '../store/authSlice';
 
 const EditProfileModal = ({
   user,
   isEditProfileModalOpen,
   setIsEditProfileModalOpen,
 }) => {
-  const { onClose } = useDisclosure();
-  const toast = useToast();
-  const dispatch = useDispatch();
-  const { baseTheme, accentTheme } = useTheme();
+  const schema = yup
+    .object()
+    .shape({
+      name: yup.string().required('Name is required'),
+      bio: yup.string().max(160, "Bio can't be more than 160 characters"),
+    })
+    .required();
 
-  const initialValues = {
-    name: '',
-    bio: null,
-    coverPicUrl: 'https://wallpaperaccess.com/full/1285952.jpg',
-    profilePicUrl: 'https://wallpaperaccess.com/full/1285952.jpg',
-  };
-  const maxImageSize = 1 * 1024 * 1024; // 1mb
-  const [loading, setLoading] = useState(false);
-  const coverPicInputRef = useRef();
-  const profilePicInputRef = useRef();
-  const [formValues, setFormValues] = useState(initialValues);
+  const { onClose } = useDisclosure();
+  const { baseTheme } = useTheme();
+  const dispatch = useDispatch();
+  const toast = useToast();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({ resolver: yupResolver(schema) });
+
+  const defaultImage =
+    'https://res.cloudinary.com/dzqbzqgqw/image/upload/v1599590554/default_profile_pic_xqjqjy.png';
+  const coverInputRef = useRef();
+  const profileInputRef = useRef();
+  const [coverPic, setCoverPic] = useState(defaultImage);
+  const [profilePic, setProfilePic] = useState(defaultImage);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [coverPicSelected, setCoverPicSelected] = useState(false);
-  const [profilePicSelected, setProfilePicSelected] = useState(false);
+  const maxImageSize = 1 * 1024 * 1024; // 1mb
 
   useEffect(() => {
-    if (user) {
-      setFormValues({
-        name: user?.name,
-        bio: user?.bio,
-        profilePicUrl: user?.profilePicUrl || initialValues.profilePicUrl,
-        coverPicUrl: user?.coverPicUrl || initialValues.coverPicUrl,
-      });
-    }
-  }, [user]);
-  const handleClose = () => {
-    setFormValues({
-      name: user?.name,
-      bio: user?.bio,
-      profilePicUrl: user?.profilePicUrl || initialValues.profilePicUrl,
-      coverPicUrl: user?.coverPicUrl || initialValues.coverPicUrl,
-    });
-    setProfilePicSelected(false);
-    setCoverPicSelected(false);
-    coverPicInputRef.current = null;
-    profilePicInputRef.current = null;
-    setIsEditProfileModalOpen(false);
-    onClose();
-    setLoading(false);
-  };
-  const validateImageSize = (target, size) => {
-    if (size > maxImageSize) {
-      onError('Image size is too large, max size is 1mb');
-      target.value = null;
-      return false;
-    }
-    console.log('valid size');
-    return true;
-  };
-  const onError = (description) => {
-    showToast(toast, {
-      status: 'error',
-      description,
-    });
-    setLoading(false);
-    return;
-  };
-  const handleSelectImage = (e) => {
-    console.log('handling image selection');
-    const file = e.target.files[0];
-    const validSize = validateImageSize(e.target, file.size);
-    if (!validSize) return;
+    setCoverPic(user?.coverPicUrl);
+    setProfilePic(user?.profilePicUrl);
 
-    switch (e.target.name) {
-      case 'cover':
-        setFormValues({
-          ...formValues,
-          coverPicUrl: URL.createObjectURL(file),
-        });
-        setCoverPicSelected(true);
-        break;
-      case 'profile':
-        setFormValues({
-          ...formValues,
-          profilePicUrl: URL.createObjectURL(file),
-        });
-        setProfilePicSelected(true);
-        break;
-    }
-  };
+    coverInputRef.current ? (coverInputRef.current.value = []) : null;
+    profileInputRef.current ? (profileInputRef.current.value = []) : null;
+  }, [user]);
+
   const uploadPicture = (path, file, onProgress) => {
     return new Promise((resolve, reject) => {
       const storageRef = ref(storage, `${path}/${uuid()}`);
@@ -135,253 +89,319 @@ const EditProfileModal = ({
         },
         (error) => {
           task.cancel();
+          onProgress(0);
           reject(error);
         },
         () => {
           console.log('completed upload, getting download url');
           getDownloadURL(task.snapshot.ref).then((downloadURL) => {
             resolve(downloadURL);
+            onProgress(0);
           });
         },
       );
     });
   };
-  const handleUpdateProfile = async () => {
-    setLoading(true);
-    const updates = formValues;
-
-    if (updates.name.trim() === '') {
-      return onError('Name cannot be empty');
+  const onSubmit = async (data) => {
+    const updates = data;
+    if (coverInputRef.current.files[0]) {
+      console.log('uploading cover pic');
+      const url = await uploadPicture(
+        'coverPics',
+        coverInputRef.current.files[0],
+        setUploadProgress,
+      );
+      updates.coverPicUrl = url;
+      console.log('upload cover complete');
+    }
+    if (profileInputRef.current.files[0]) {
+      console.log('uploading profile pic');
+      const url = await uploadPicture(
+        'profilePics',
+        profileInputRef.current.files[0],
+        setUploadProgress,
+      );
+      updates.profilePicUrl = url;
+      console.log('upload profile complete');
     }
 
-    if (coverPicSelected) {
-      try {
-        const url = await uploadPicture(
-          'coverPics',
-          coverPicInputRef.current.files[0],
-          setUploadProgress,
-        );
-        updates.coverPicUrl = url;
-      } catch (e) {
-        return onError('Error uploading cover picture');
-      }
-    }
-
-    if (profilePicSelected) {
-      try {
-        const url = await uploadPicture(
-          'profilePics',
-          profilePicInputRef.current.files[0],
-          setUploadProgress,
-        );
-        updates.profilePicUrl = url;
-      } catch (e) {
-        return onError('Error uploading profile picture');
-      }
-    }
-
+    console.log(updates);
     const res = await dispatch(updateProfile(updates));
     if (res.error) {
       return onError('Error updating profile');
     }
 
-    setLoading(false);
+    console.log('submitted');
     handleClose();
+  };
+  const handleClose = () => {
+    onClose();
+    setIsEditProfileModalOpen(false);
+  };
+  const onError = (description) => {
+    showToast(toast, {
+      status: 'error',
+      description,
+    });
+  };
+  const validateImage = (t) => {
+    const size = t.files[0].size;
+    if (size > maxImageSize) {
+      onError('Image size is too large, max size is 1mb');
+      t.value = [];
+      console.log('invalid size');
+      console.log(t.files);
+
+      return false;
+    }
+    console.log('valid size');
+    console.log(t.files);
+
+    if (t.name === 'cover') {
+      setCoverPic(URL.createObjectURL(t.files[0]));
+    } else {
+      setProfilePic(URL.createObjectURL(t.files[0]));
+    }
+
+    return true;
+  };
+  const onChangeCapture = (e) => {
+    console.log(e.target.src);
+    const file = e.target.files[0];
+    const validImage = validateImage(e.target);
+    if (!validImage) return;
   };
 
   return (
     <Modal isOpen={isEditProfileModalOpen} onClose={handleClose}>
       <ModalOverlay backgroundColor={baseTheme.overlayColor} />
-      <ModalContent
-        overflow={'hidden'}
-        mx={4}
-        maxW={'md'}
-        borderRadius={'2xl'}
-        backgroundColor={baseTheme.backgroundColor}
-      >
-        {uploadProgress > 0 && <Progress value={uploadProgress} size={'sm'} />}
-        <ModalHeader color={baseTheme.textPrimaryColor}>
-          Edit Profile
-          {!loading && <ModalCloseButton color={baseTheme.textPrimaryColor} />}
-        </ModalHeader>
-
-        <ModalBody>
-          <Box position={'relative'} borderRadius={'md'} overflow={'hidden'}>
-            {/* Cover Pic upload overlay*/}
-            <Image
-              src={formValues.coverPicUrl}
-              h={{ base: 24, md: 28 }}
-              w={'full'}
-              objectFit={'cover'}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <ModalContent
+          overflow={'hidden'}
+          mx={4}
+          maxW={'md'}
+          borderRadius={'2xl'}
+          backgroundColor={baseTheme.backgroundColor}
+        >
+          {uploadProgress > 0 && (
+            <Progress value={uploadProgress} size={'sm'} />
+          )}
+          <ModalHeader color={baseTheme.textPrimaryColor}>
+            Edit Profile
+            {!isSubmitting && (
+              <ModalCloseButton color={baseTheme.textPrimaryColor} />
+            )}
+          </ModalHeader>
+          <ModalBody>
+            <CoverPic
+              onClick={() => coverInputRef.current.click()}
+              image={coverPic}
             />
-
-            <Stack
-              direction={'row'}
-              spacing={4}
-              alignItems={'center'}
-              justifyContent={'center'}
-              position={'absolute'}
-              top={0}
-              left={0}
-              w={'full'}
-              h={'full'}
-              backgroundColor={'blackAlpha.700'}
-            >
-              <FiImage
-                color="white"
-                fontSize={'1.3em'}
-                onClick={() => {
-                  coverPicInputRef.current.click();
-                }}
-                cursor={'pointer'}
-              />
-
-              {/* <FiX
-                onClick={() => {}}
-                color="white"
-                fontSize={'1.3em'}
-                cursor={'pointer'}
-              /> */}
-            </Stack>
-          </Box>
-
-          {/* Profile Pic upload overlay*/}
-          <Box
-            mt={-10}
-            ml={2}
-            w={'max'}
-            mb={4}
-            position={'relative'}
-            borderRadius={'full'}
-            overflow={'hidden'}
-          >
-            <Circle
-              size={{ base: '20', md: '24' }}
-              overflow={'hidden'}
-              borderWidth={'4px'}
-              borderColor={baseTheme.backgroundColor}
-            >
-              <Avatar
-                h={'100%'}
-                w={'100%'}
-                objectFit={'cover'}
-                name={user?.name}
-                fontSize={'8xl'}
-                src={formValues.profilePicUrl}
-              />
-            </Circle>
-
-            <Flex
-              alignItems={'center'}
-              justifyContent={'center'}
-              position={'absolute'}
-              top={0}
-              left={0}
-              w={'full'}
-              h={'full'}
-              backgroundColor={'blackAlpha.600'}
-            >
-              <FiImage
-                onClick={() => {}}
-                color="white"
-                fontSize={'1.3em'}
-                onClick={() => {
-                  profilePicInputRef.current.click();
-                }}
-                cursor={'pointer'}
-              />
-            </Flex>
-          </Box>
-
-          <FormControl mb={4} borderColor={baseTheme.borderColor}>
-            {/* Hidden inputs */}
-            <>
-              <Input
-                name="cover"
-                onChange={handleSelectImage}
-                type={'file'}
-                display={'none'}
-                ref={coverPicInputRef}
-                accept="image/jpeg,image/png,image/jpg"
-              />
-              <Input
-                name="profile"
-                onChange={handleSelectImage}
-                type={'file'}
-                display={'none'}
-                ref={profilePicInputRef}
-                accept="image/jpeg,image/png,image/jpg"
-              />
-            </>
-            <FormLabel color={baseTheme.textPrimaryColor} mb={0}>
-              Name
-            </FormLabel>
-            <Input
-              color={baseTheme.textPrimaryColor}
-              value={formValues.name}
-              placeholder="Name"
-              type={'text'}
-              onChange={(e) => {
-                setFormValues({ ...formValues, name: e.target.value });
-              }}
+            <ProfilePic
+              onClick={() => profileInputRef.current.click()}
+              image={profilePic}
             />
-          </FormControl>
-
-          <FormControl
-            color={baseTheme.textPrimaryColor}
-            borderColor={baseTheme.borderColor}
-          >
-            <FormLabel mb={0}>Bio</FormLabel>
-            <Textarea
-              color={baseTheme.textPrimaryColor}
-              value={formValues.bio}
-              placeholder="Bio"
-              maxLength={160}
-              onChange={(e) => {
-                setFormValues({ ...formValues, bio: e.target.value });
-              }}
+            <input
+              onChange={onChangeCapture}
+              name="cover"
+              style={{ display: 'none' }}
+              type="file"
+              ref={coverInputRef}
             />
-          </FormControl>
-        </ModalBody>
+            <input
+              onChange={onChangeCapture}
+              name="profile"
+              style={{ display: 'none' }}
+              type="file"
+              ref={profileInputRef}
+            />
+            <NameInput
+              register={register}
+              errors={errors}
+              defaultValue={user?.name}
+            />
+            <BioInput
+              register={register}
+              errors={errors}
+              defaultValue={user?.bio}
+            />
+          </ModalBody>
 
-        <ModalFooter>
-          <Button
-            borderWidth={'1px'}
-            color={baseTheme.textPrimaryColor}
-            borderColor={baseTheme.borderColorAlt}
-            backgroundColor={baseTheme.backgroundColor}
-            mr={3}
-            onClick={handleClose}
-            size={'sm'}
-            borderRadius={'full'}
-            _hover={{
-              backgroundColor: baseTheme.backgroundHoverColor,
-            }}
-            _focus={{
-              backgroundColor: baseTheme.backgroundHoverColor,
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleUpdateProfile}
-            isLoading={loading}
-            size={'sm'}
-            borderRadius={'full'}
-            backgroundColor={accentTheme.accentColor}
-            color={accentTheme.textColor}
-            _hover={{
-              backgroundColor: accentTheme.accentHoverColor,
-            }}
-            _focus={{
-              backgroundColor: accentTheme.accentHoverColor,
-            }}
-          >
-            Save
-          </Button>
-        </ModalFooter>
-      </ModalContent>
+          <ModalFooter>
+            <CancelButton onClick={handleClose} />
+            <SubmitButton isLoading={isSubmitting} />
+          </ModalFooter>
+        </ModalContent>
+      </form>
     </Modal>
+  );
+};
+
+const CoverPic = (props) => {
+  return (
+    <Box position={'relative'} borderRadius={'md'} overflow={'hidden'}>
+      <Image
+        src={props.image}
+        {...props}
+        h={{ base: 24, md: 28 }}
+        w={'full'}
+        objectFit={'cover'}
+      />
+
+      <Stack
+        direction={'row'}
+        spacing={4}
+        alignItems={'center'}
+        justifyContent={'center'}
+        position={'absolute'}
+        top={0}
+        left={0}
+        w={'full'}
+        h={'full'}
+        backgroundColor={'blackAlpha.700'}
+      >
+        <FiImage
+          onClick={props.onClick}
+          color="white"
+          fontSize={'1.3em'}
+          cursor={'pointer'}
+        />
+      </Stack>
+    </Box>
+  );
+};
+const ProfilePic = (props) => {
+  const { baseTheme } = useTheme();
+  return (
+    <Box
+      mt={-10}
+      ml={2}
+      w={'max'}
+      mb={4}
+      position={'relative'}
+      borderRadius={'full'}
+      overflow={'hidden'}
+    >
+      <Circle
+        size={{ base: '20', md: '24' }}
+        overflow={'hidden'}
+        borderWidth={'4px'}
+        borderColor={baseTheme.backgroundColor}
+      >
+        <Avatar
+          src={props.image}
+          {...props}
+          h={'100%'}
+          w={'100%'}
+          objectFit={'cover'}
+          fontSize={'8xl'}
+        />
+      </Circle>
+
+      <Flex
+        alignItems={'center'}
+        justifyContent={'center'}
+        position={'absolute'}
+        top={0}
+        left={0}
+        w={'full'}
+        h={'full'}
+        backgroundColor={'blackAlpha.600'}
+      >
+        <FiImage
+          onClick={props.onClick}
+          color="white"
+          fontSize={'1.3em'}
+          cursor={'pointer'}
+        />
+      </Flex>
+    </Box>
+  );
+};
+const NameInput = ({ register, errors, defaultValue }) => {
+  const { baseTheme } = useTheme();
+
+  return (
+    <FormControl
+      mb={4}
+      borderColor={baseTheme.borderColor}
+      isInvalid={errors.name}
+    >
+      <FormLabel color={baseTheme.textPrimaryColor} mb={0} htmlFor="name">
+        Name
+      </FormLabel>
+      <Input
+        defaultValue={defaultValue}
+        {...register('name')}
+        color={baseTheme.textPrimaryColor}
+        placeholder="Name"
+        type={'text'}
+      />
+      <FormErrorMessage>{errors.name && errors.name.message}</FormErrorMessage>
+    </FormControl>
+  );
+};
+const BioInput = ({ register, errors, defaultValue }) => {
+  const { baseTheme } = useTheme();
+  return (
+    <FormControl
+      color={baseTheme.textPrimaryColor}
+      borderColor={baseTheme.borderColor}
+    >
+      <FormLabel mb={0}>Bio</FormLabel>
+      <Textarea
+        defaultValue={defaultValue}
+        {...register('bio')}
+        color={baseTheme.textPrimaryColor}
+        placeholder="Bio"
+        maxLength={160}
+      />
+      <FormErrorMessage>{errors.bio && errors.bio.message}</FormErrorMessage>
+    </FormControl>
+  );
+};
+const SubmitButton = (props) => {
+  const { accentTheme } = useTheme();
+  return (
+    <Button
+      {...props}
+      type="submit"
+      size={'sm'}
+      borderRadius={'full'}
+      backgroundColor={accentTheme.accentColor}
+      color={accentTheme.textColor}
+      _hover={{
+        backgroundColor: accentTheme.accentHoverColor,
+      }}
+      _focus={{
+        backgroundColor: accentTheme.accentHoverColor,
+      }}
+    >
+      Save
+    </Button>
+  );
+};
+const CancelButton = (props) => {
+  const { baseTheme } = useTheme();
+  return (
+    <Button
+      {...props}
+      borderWidth={'1px'}
+      color={baseTheme.textPrimaryColor}
+      borderColor={baseTheme.borderColorAlt}
+      backgroundColor={baseTheme.backgroundColor}
+      mr={3}
+      size={'sm'}
+      borderRadius={'full'}
+      _hover={{
+        backgroundColor: baseTheme.backgroundHoverColor,
+      }}
+      _focus={{
+        backgroundColor: baseTheme.backgroundHoverColor,
+      }}
+    >
+      Cancel
+    </Button>
   );
 };
 

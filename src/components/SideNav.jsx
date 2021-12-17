@@ -64,7 +64,7 @@ const UserHeader = () => {
           <Avatar
             src={user?.profilePicUrl && user.profilePicUrl}
             name={user?.name}
-            size="md"
+            size={isLg ? 'md' : 'sm'}
             mr={isLg && 3}
           />
         )}
@@ -128,7 +128,7 @@ const SideNav = () => {
     <Box pt={4} position={'sticky'} top={0}>
       <UserHeader />
 
-      <Stack direction="column" spacing={5}>
+      <Stack direction="column" spacing={5} w={'full'}>
         {links.map(({ icon, title, onClick }, index) => (
           <NavButton icon={icon} title={title} onClick={onClick} key={index} />
         ))}

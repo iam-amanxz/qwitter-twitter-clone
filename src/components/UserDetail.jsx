@@ -5,6 +5,7 @@ import {
   Flex,
   Heading,
   Text,
+  useMediaQuery,
   useToast,
 } from '@chakra-ui/react';
 import { memo, useEffect } from 'react';
@@ -21,6 +22,7 @@ const UserDetail = memo(
     const dispatch = useDispatch();
     const { baseTheme } = useTheme();
     const toast = useToast();
+    const [isSm] = useMediaQuery('(min-width: 480px)');
 
     const handleFollowUnfollow = async () => {
       const following = user.followers.includes(currentUser.username);
@@ -80,46 +82,50 @@ const UserDetail = memo(
           <Link to={`/${user.username}`}>
             <Avatar
               src={user.profilePicUrl && user.profilePicUrl}
-              size="md"
+              size={isSm ? 'md' : 'sm'}
               mr={3}
               name={user.name}
             />
           </Link>
         </Box>
 
-        <Box flexGrow={1} mr={6}>
-          <Link to={`/${user.username}`}>
-            <Flex>
-              <Heading size="xs" color={baseTheme.textPrimaryColor} mr={1}>
-                {user.name}
-              </Heading>
-              <Text fontSize="xs" color={baseTheme.textSecondaryColor}>
-                @{user.username}
-              </Text>
-            </Flex>
+        <Box flexGrow={1}>
+          <Flex justifyContent={'space-between'} w={'full'}>
+            <Box>
+              <Link to={`/${user.username}`}>
+                <Heading size="xs" color={baseTheme.textPrimaryColor} mr={1}>
+                  {user.name}
+                </Heading>
+                <Text fontSize="xs" color={baseTheme.textSecondaryColor}>
+                  @{user.username}
+                </Text>
+              </Link>
+            </Box>
 
-            {user.bio && (
-              <Text fontSize={'sm'} color={baseTheme.textPrimaryColor}>
-                {user.bio}
-              </Text>
+            {user.username !== currentUser?.username && (
+              <Button
+                flexShrink={0}
+                onClick={handleFollowUnfollow}
+                backgroundColor={baseTheme.contrastBtnBgColor}
+                color={baseTheme.contrastBtnTextColor}
+                _hover={{
+                  backgroundColor: baseTheme.contrastBtnBgHoverColor,
+                }}
+                size="xs"
+              >
+                {user.followers.includes(currentUser?.username)
+                  ? 'Unfollow'
+                  : 'Follow'}
+              </Button>
             )}
-          </Link>
-        </Box>
+          </Flex>
 
-        {user.username !== currentUser?.username && (
-          <Button
-            flexShrink={0}
-            onClick={handleFollowUnfollow}
-            backgroundColor={baseTheme.contrastBtnBgColor}
-            color={baseTheme.contrastBtnTextColor}
-            _hover={{ backgroundColor: baseTheme.contrastBtnBgHoverColor }}
-            size="xs"
-          >
-            {user.followers.includes(currentUser?.username)
-              ? 'Unfollow'
-              : 'Follow'}
-          </Button>
-        )}
+          {user.bio && (
+            <Text fontSize={'sm'} color={baseTheme.textPrimaryColor}>
+              {user.bio}
+            </Text>
+          )}
+        </Box>
       </Flex>
     );
   },

@@ -8,6 +8,7 @@ import {
   TabPanels,
   Tabs,
   Text,
+  useMediaQuery,
 } from '@chakra-ui/react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import SideBar from '../components/SideBar';
@@ -53,6 +54,7 @@ const ExploreTabs = () => {
   const { tabIndex, username } = useParams();
   const { baseTheme, accentTheme } = useTheme();
   const { users } = useSelector((state) => state.users);
+  const [isSm] = useMediaQuery('(min-width: 480px)');
 
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
@@ -75,7 +77,7 @@ const ExploreTabs = () => {
   }, [users, username]);
 
   const renderEmpty = (message) => (
-    <Box p={6} textAlign={'center'}>
+    <Box p={3} textAlign={'center'}>
       <Text fontWeight={'medium'} color={baseTheme.textSecondaryColor}>
         {message}
       </Text>
@@ -94,6 +96,7 @@ const ExploreTabs = () => {
         justifyContent={'space-between'}
       >
         <Tab
+          fontSize={!isSm ? '0.9em' : '1em'}
           onClick={() => {
             navigate(`/${username}/explore/to_follow`);
           }}
@@ -105,10 +108,11 @@ const ExploreTabs = () => {
             boxShadow: 'none',
           }}
         >
-          Who to follow
+          To follow
         </Tab>
 
         <Tab
+          fontSize={!isSm ? '0.9em' : '1em'}
           onClick={() => {
             navigate(`/${username}/explore/followers`);
           }}
@@ -124,6 +128,7 @@ const ExploreTabs = () => {
         </Tab>
 
         <Tab
+          fontSize={!isSm ? '0.9em' : '1em'}
           onClick={() => {
             navigate(`/${username}/explore/following`);
           }}
@@ -145,17 +150,17 @@ const ExploreTabs = () => {
             ? notFollowing.map((user) => (
                 <UserDetail key={user.id} user={user} />
               ))
-            : renderEmpty('You are following everyone!')}
+            : renderEmpty('No more users to follow!')}
         </TabPanel>
         <TabPanel>
           {followers.length > 0
             ? followers.map((user) => <UserDetail key={user.id} user={user} />)
-            : renderEmpty('You have no followers!')}
+            : renderEmpty('No followers!')}
         </TabPanel>
         <TabPanel>
           {following.length > 0
             ? following.map((user) => <UserDetail key={user.id} user={user} />)
-            : renderEmpty('You are not following anyone!')}
+            : renderEmpty('No followings!')}
         </TabPanel>
       </TabPanels>
     </Tabs>

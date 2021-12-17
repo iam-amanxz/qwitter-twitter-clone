@@ -13,6 +13,7 @@ import {
   ModalOverlay,
   Stack,
   useDisclosure,
+  useMediaQuery,
 } from '@chakra-ui/react';
 import React from 'react';
 import { useTheme } from '../context/themeContext';
@@ -21,6 +22,7 @@ const ThemeModal = ({ isThemeModalOpen, setIsThemeModalOpen }) => {
   const { baseTheme, setBaseTheme, accentTheme, setAccentTheme, themes } =
     useTheme();
   const { onClose } = useDisclosure();
+  const [isSm] = useMediaQuery('(min-width: 480px)');
 
   const handleClose = () => {
     onClose();
@@ -65,7 +67,7 @@ const ThemeModal = ({ isThemeModalOpen, setIsThemeModalOpen }) => {
             {Object.entries(themes.accentThemes).map(([key, value]) => (
               <Circle
                 key={key}
-                size={8}
+                size={isSm ? 7 : 5}
                 bg={value.accentColor}
                 cursor={'pointer'}
                 _hover={{
