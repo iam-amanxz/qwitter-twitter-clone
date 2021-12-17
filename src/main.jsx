@@ -8,6 +8,7 @@ import ThemeProvider from './context/themeContext';
 import './global.css';
 import '@fontsource/roboto';
 import '@fontsource/rubik';
+import NavProvider from './context/navContext';
 
 const theme = extendTheme({
   fonts: {
@@ -21,7 +22,9 @@ ReactDOM.render(
     <Provider store={store}>
       <ChakraProvider theme={theme}>
         <ThemeProvider>
-          <App />
+          <NavProvider>
+            <App />
+          </NavProvider>
         </ThemeProvider>
       </ChakraProvider>
     </Provider>

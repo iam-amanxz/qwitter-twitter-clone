@@ -2,22 +2,13 @@ import {
   Box,
   Button,
   Circle,
-  Flex,
   Image,
   Square,
   Stack,
-  Text,
   useMediaQuery,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import {
-  FiEdit,
-  FiFeather,
-  FiHash,
-  FiHome,
-  FiPower,
-  FiUser,
-} from 'react-icons/fi';
+import { FiFeather } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/themeContext';
@@ -25,17 +16,35 @@ import { userSelector } from '../store/userSlice';
 import LogoutModal from './LogoutModal';
 import ThemeModal from './ThemeModal';
 import TweetModal from './TweetModal';
+import { useNav } from '../context/navContext';
+import {
+  RiUser3Line,
+  RiUser3Fill,
+  RiHome3Line,
+  RiHome3Fill,
+  RiSearch2Fill,
+  RiSearch2Line,
+  RiBrushFill,
+  RiBrushLine,
+  RiLogoutCircleLine,
+  RiLogoutCircleFill,
+} from 'react-icons/ri';
 
-const NavButton = ({ icon, ...props }) => {
+const NavButton = ({ icon, iconActive, title, ...props }) => {
   const { baseTheme } = useTheme();
+  const { activeNav } = useNav();
 
   return (
     <Square size={'30px'}>
       <Button
+        isActive={title === activeNav}
+        _active={{
+          bg: baseTheme.backgroundColor,
+        }}
         backgroundColor={baseTheme.backgroundColor}
         _hover={{ backgroundColor: baseTheme.backgroundColor }}
         color={baseTheme.textPrimaryColor}
-        leftIcon={icon}
+        leftIcon={title !== activeNav ? icon : iconActive}
         iconSpacing={0}
         {...props}
       ></Button>
@@ -51,6 +60,7 @@ const MobileNav = () => {
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isTweetModalOpen, setIsTweetModalOpen] = useState(false);
+  const { setActiveNav } = useNav();
 
   const UserAvatar = () => (
     <Circle
@@ -70,20 +80,40 @@ const MobileNav = () => {
 
   const primaryLinks = [
     {
-      icon: <FiHome fontSize={'1.3em'} />,
-      onClick: () => navigate('/'),
+      icon: <RiHome3Line fontSize={'1.3em'} />,
+      iconActive: <RiHome3Fill fontSize={'1.3em'} />,
+      title: 'Home',
+      onClick: () => {
+        navigate(`/`);
+        setActiveNav('Home');
+      },
     },
     {
-      icon: <FiHash fontSize={'1.3em'} />,
-      onClick: () => navigate(`/${user.username}/explore/to_follow`),
+      icon: <RiSearch2Line fontSize={'1.3em'} />,
+      iconActive: <RiSearch2Fill fontSize={'1.3em'} />,
+      title: 'Explore',
+      onClick: () => {
+        navigate(`/${user.username}/explore/to_follow`);
+        setActiveNav('Explore');
+      },
     },
     {
-      icon: <FiEdit fontSize={'1.3em'} />,
-      onClick: () => setIsThemeModalOpen(true),
+      icon: <RiBrushLine fontSize={'1.3em'} />,
+      iconActive: <RiBrushFill fontSize={'1.3em'} />,
+      title: 'Theme',
+      onClick: () => {
+        setIsThemeModalOpen(true);
+        setActiveNav('Theme');
+      },
     },
     {
-      icon: <FiPower fontSize={'1.3em'} />,
-      onClick: () => setIsLogoutModalOpen(true),
+      icon: <RiLogoutCircleLine fontSize={'1.3em'} />,
+      iconActive: <RiLogoutCircleFill fontSize={'1.3em'} />,
+      title: 'Logout',
+      onClick: () => {
+        setIsLogoutModalOpen(true);
+        setActiveNav('Logout');
+      },
     },
     {
       icon: <UserAvatar />,
@@ -103,8 +133,14 @@ const MobileNav = () => {
       backgroundColor={baseTheme.backgroundColor}
     >
       <Stack direction={'row'} justifyContent={'space-around'} p={3}>
-        {primaryLinks.map(({ icon, onClick }, index) => (
-          <NavButton icon={icon} onClick={onClick} key={index} />
+        {primaryLinks.map(({ title, icon, iconActive, onClick }, index) => (
+          <NavButton
+            title={title}
+            icon={icon}
+            onClick={onClick}
+            key={index}
+            iconActive={iconActive}
+          />
         ))}
       </Stack>
 

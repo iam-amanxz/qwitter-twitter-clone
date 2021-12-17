@@ -11,3 +11,18 @@ export const showToast = (
     position: position || 'bottom-right',
   });
 };
+
+export const pageVariants = {
+  initial: {
+    opacity: 0,
+    bottom: '-100vh',
+  },
+  in: {
+    opacity: 1,
+    bottom: 0,
+  },
+  out: {
+    opacity: 0,
+    bottom: '-100vh',
+  },
+};

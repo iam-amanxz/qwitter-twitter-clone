@@ -1,6 +1,8 @@
 import { Box, Center, Flex, useMediaQuery } from '@chakra-ui/react';
+
 import MobileNav from '../components/MobileNav';
 import { useTheme } from '../context/themeContext';
+import { pageVariants } from '../utils';
 
 const MainLayout = ({ left, right, center }) => {
   const { baseTheme } = useTheme();

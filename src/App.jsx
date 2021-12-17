@@ -7,9 +7,10 @@ import {
   setCurrentUser,
   setAuthenticated,
 } from './store/authSlice';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import AuthPage from './routes/AuthPage';
 import HomePage from './routes/HomePage';
+import NotFoundPage from './routes/NotFoundPage';
 import PrivateRoute from './routes/PrivateRoute';
 import {
   addUser,
@@ -26,6 +27,7 @@ import {
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import ExplorePage from './routes/ExplorePage';
 import ProfilePage from './routes/ProfilePage';
+import AuthRoute from './routes/AuthRoute';
 
 function App() {
   const dispatch = useDispatch();
@@ -108,7 +110,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/auth" element={<AuthPage />} />
+        <Route
+          path="/auth"
+          element={
+            <AuthRoute>
+              <AuthPage />
+            </AuthRoute>
+          }
+        />
         <Route
           path="/"
           element={
@@ -133,6 +142,7 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );
