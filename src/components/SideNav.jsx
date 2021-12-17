@@ -10,29 +10,40 @@ import {
   SkeletonCircle,
   SkeletonText,
 } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
-import {
-  FiHome,
-  FiUser,
-  FiHash,
-  FiPower,
-  FiEdit,
-  FiFeather,
-} from 'react-icons/fi';
+import React, { useState } from 'react';
+import { FiFeather } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
+import { useNav } from '../context/navContext';
 import { useTheme } from '../context/themeContext';
 import { userSelector } from '../store/userSlice';
 import LogoutModal from './LogoutModal';
 import ThemeModal from './ThemeModal';
 import TweetModal from './TweetModal';
+import {
+  RiUser3Line,
+  RiUser3Fill,
+  RiHome3Line,
+  RiHome3Fill,
+  RiSearch2Fill,
+  RiSearch2Line,
+  RiBrushFill,
+  RiBrushLine,
+  RiLogoutCircleLine,
+  RiLogoutCircleFill,
+} from 'react-icons/ri';
 
-const NavButton = ({ icon, title, ...props }) => {
+const NavButton = ({ icon, iconActive, title, ...props }) => {
   const [isLg] = useMediaQuery('(min-width: 992px)');
   const { baseTheme } = useTheme();
+  const { activeNav } = useNav();
 
   return (
     <Button
+      isActive={title === activeNav}
+      _active={{
+        bg: baseTheme.backgroundColor,
+      }}
       backgroundColor={baseTheme.backgroundColor}
       _hover={{ backgroundColor: baseTheme.backgroundHoverColor }}
       color={baseTheme.textPrimaryColor}
@@ -40,7 +51,8 @@ const NavButton = ({ icon, title, ...props }) => {
       px={isLg && 3}
       borderRadius={'full'}
       iconSpacing={isLg && 3}
-      leftIcon={icon}
+      leftIcon={title !== activeNav ? icon : iconActive}
+      fontWeight={title !== activeNav ? 'normal' : 'bold'}
       {...props}
     >
       {isLg && title}
@@ -95,32 +107,53 @@ const SideNav = () => {
   const [isTweetModalOpen, setIsTweetModalOpen] = useState(false);
   const navigate = useNavigate();
   const { currentUser } = useSelector((state) => state.auth);
+  const { setActiveNav } = useNav();
 
   const links = [
     {
-      icon: <FiHome fontSize={'1.3em'} />,
+      icon: <RiHome3Line fontSize={'1.3em'} />,
+      iconActive: <RiHome3Fill fontSize={'1.3em'} />,
       title: 'Home',
-      onClick: () => navigate(`/`),
+      onClick: () => {
+        navigate(`/`);
+        setActiveNav('Home');
+      },
     },
     {
-      icon: <FiHash fontSize={'1.3em'} />,
+      icon: <RiSearch2Line fontSize={'1.3em'} />,
+      iconActive: <RiSearch2Fill fontSize={'1.3em'} />,
       title: 'Explore',
-      onClick: () => navigate(`/${currentUser.username}/explore/to_follow`),
+      onClick: () => {
+        navigate(`/${currentUser.username}/explore/to_follow`);
+        setActiveNav('Explore');
+      },
     },
     {
-      icon: <FiEdit fontSize={'1.3em'} />,
+      icon: <RiBrushLine fontSize={'1.3em'} />,
+      iconActive: <RiBrushFill fontSize={'1.3em'} />,
       title: 'Theme',
-      onClick: () => setIsThemeModalOpen(true),
+      onClick: () => {
+        setIsThemeModalOpen(true);
+        setActiveNav('Theme');
+      },
     },
     {
-      icon: <FiUser fontSize={'1.3em'} />,
+      icon: <RiUser3Line fontSize={'1.3em'} />,
+      iconActive: <RiUser3Fill fontSize={'1.3em'} />,
       title: 'Profile',
-      onClick: () => navigate(`/${currentUser.username}`),
+      onClick: () => {
+        navigate(`/${currentUser.username}`);
+        setActiveNav('Profile');
+      },
     },
     {
-      icon: <FiPower fontSize={'1.3em'} />,
+      icon: <RiLogoutCircleLine fontSize={'1.3em'} />,
+      iconActive: <RiLogoutCircleFill fontSize={'1.3em'} />,
       title: 'Logout',
-      onClick: () => setIsLogoutModalOpen(true),
+      onClick: () => {
+        setIsLogoutModalOpen(true);
+        setActiveNav('Logout');
+      },
     },
   ];
 
@@ -129,8 +162,14 @@ const SideNav = () => {
       <UserHeader />
 
       <Stack direction="column" spacing={5} w={'full'}>
-        {links.map(({ icon, title, onClick }, index) => (
-          <NavButton icon={icon} title={title} onClick={onClick} key={index} />
+        {links.map(({ icon, iconActive, title, onClick }, index) => (
+          <NavButton
+            icon={icon}
+            title={title}
+            onClick={onClick}
+            key={index}
+            iconActive={iconActive}
+          />
         ))}
 
         <Button
