@@ -8,6 +8,7 @@ import {
   TabPanels,
   Tabs,
   Text,
+  useMediaQuery,
 } from '@chakra-ui/react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import SideBar from '../components/SideBar';
@@ -53,6 +54,7 @@ const ExploreTabs = () => {
   const { tabIndex, username } = useParams();
   const { baseTheme, accentTheme } = useTheme();
   const { users } = useSelector((state) => state.users);
+  const [isSm] = useMediaQuery('(min-width: 480px)');
 
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
@@ -94,6 +96,7 @@ const ExploreTabs = () => {
         justifyContent={'space-between'}
       >
         <Tab
+          fontSize={!isSm ? '0.9em' : '1em'}
           onClick={() => {
             navigate(`/${username}/explore/to_follow`);
           }}
@@ -105,10 +108,11 @@ const ExploreTabs = () => {
             boxShadow: 'none',
           }}
         >
-          Who to follow
+          To follow
         </Tab>
 
         <Tab
+          fontSize={!isSm ? '0.9em' : '1em'}
           onClick={() => {
             navigate(`/${username}/explore/followers`);
           }}
@@ -124,6 +128,7 @@ const ExploreTabs = () => {
         </Tab>
 
         <Tab
+          fontSize={!isSm ? '0.9em' : '1em'}
           onClick={() => {
             navigate(`/${username}/explore/following`);
           }}

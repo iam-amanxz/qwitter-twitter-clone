@@ -6,6 +6,7 @@ import {
   Image,
   Stack,
   Text,
+  useMediaQuery,
   useToast,
 } from '@chakra-ui/react';
 import { FiHeart } from 'react-icons/fi';
@@ -32,7 +33,7 @@ const Post = memo(
     const { currentUser } = useSelector((state) => state.auth);
     const toast = useToast();
     const dispatch = useDispatch();
-
+    const [isSm] = useMediaQuery('(min-width: 480px)');
     const owner = users.find((user) => user.username === post.owner);
 
     const formatDate = (date) => {
@@ -83,7 +84,7 @@ const Post = memo(
         <Link to={`/${owner?.username}`}>
           <Avatar
             name={owner?.name}
-            size="md"
+            size={isSm ? 'md' : 'sm'}
             mr={3}
             src={owner?.profilePicUrl && owner.profilePicUrl}
           />
