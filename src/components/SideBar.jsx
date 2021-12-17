@@ -55,7 +55,12 @@ const SideBar = () => {
       {isLoading && <SkeletonText w={'full'} />}
 
       {!isLoading && usersToFollow.length === 0 && (
-        <Text mt={4} fontSize={'sm'} fontWeight={'medium'}>
+        <Text
+          mt={4}
+          fontSize={'sm'}
+          fontWeight={'medium'}
+          color={baseTheme.textSecondaryColor}
+        >
           No more users to follow
         </Text>
       )}

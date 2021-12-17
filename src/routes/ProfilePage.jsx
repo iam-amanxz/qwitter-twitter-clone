@@ -223,7 +223,7 @@ const ProfileBanner = ({ user }) => {
             top={3}
             fontWeight={'normal'}
             borderRadius={'full'}
-            borderColor={baseTheme.textSecondaryColor}
+            borderColor={baseTheme.borderColorAlt}
             variant="outline"
             onClick={() => setIsEditProfileModalOpen(true)}
             _hover={{
@@ -245,7 +245,7 @@ const ProfileBanner = ({ user }) => {
             top={3}
             fontWeight={'normal'}
             borderRadius={'full'}
-            borderColor={baseTheme.textSecondaryColor}
+            borderColor={baseTheme.borderColorAlt}
             variant="outline"
             _hover={{
               backgroundColor: 'whiteAlpha.100',

@@ -13,13 +13,13 @@ const MainLayout = ({ left, right, center }) => {
     >
       <Center mx={'auto'} maxWidth={'1200px'}>
         <Flex flexGrow={1}>
-          <Box w={{ base: '60px', lg: '20%' }}>{left}</Box>
+          <Box w={{ base: '10%', lg: '20%' }}>{left}</Box>
 
           <Box
             borderWidth={'1px'}
             borderColor={baseTheme.borderColor}
             minH={'100vh'}
-            w={{ base: 'full', lg: '50%' }}
+            w={{ base: '90%', lg: '50%' }}
           >
             {center}
           </Box>
